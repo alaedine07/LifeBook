@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import Header from './components/Header';
-import QuestionPage from './components/FillYourDay';
+import QuestionAnswer from './components/QuestionAnswer';
 import PageIndicator from './components/PageIndicator';
 import { questions as mockQuestions } from './mocks/questions.mocks';
 
@@ -26,15 +26,9 @@ const App: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const renderItem = ({
-    item: question,
-    index,
-  }: {
-    item: string;
-    index: number;
-  }) => (
+  const renderItem = ({ item: question }: { item: string; index: number }) => (
     <View style={[styles.pageContainer, { width: windowWidth }]}>
-      <QuestionPage question={question} />
+      <QuestionAnswer question={question} />
     </View>
   );
 

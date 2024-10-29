@@ -12,11 +12,11 @@ import {
   Platform,
 } from 'react-native';
 
-interface QuestionPageProps {
+interface QuestionAnswerProps {
   question: string;
 }
 
-const QuestionPage: React.FC<QuestionPageProps> = ({ question }) => {
+const QuestionAnswer: React.FC<QuestionAnswerProps> = ({ question }) => {
   const [answer, setAnswer] = useState('');
   const [submittedAnswers, setSubmittedAnswers] = useState<string[]>([]);
 
@@ -92,4 +92,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default QuestionPage;
+export default QuestionAnswer;
