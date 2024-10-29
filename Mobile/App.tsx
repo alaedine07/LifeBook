@@ -1,18 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
-import PagerView from '@react-native-community/viewpager';
-
+import React, { useState } from 'react';
+import {
+  SafeAreaView,
+  ActivityIndicator,
+  StyleSheet,
+  View,
+  FlatList,
+  Dimensions,
+} from 'react-native';
 import Header from './components/Header';
 import QuestionPage from './components/FillYourDay';
 import PageIndicator from './components/PageIndicator';
 import { questions as mockQuestions } from './mocks/questions.mocks';
+
+const windowWidth = Dimensions.get('window').width;
 
 const App: React.FC = () => {
   const [questions] = useState(() =>
     mockQuestions.map((item) => item.question)
   );
   const [currentPage, setCurrentPage] = useState<number>(0);
-  const [answer, setAnswer] = useState<string>('');
+
+  const handleScroll = (event: any) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const page = Math.round(offsetX / windowWidth);
+    setCurrentPage(page);
+  };
+
+  const renderItem = ({
+    item: question,
+    index,
+  }: {
+    item: string;
+    index: number;
+  }) => (
+    <View style={[styles.pageContainer, { width: windowWidth }]}>
+      <QuestionPage question={question} />
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -21,20 +45,16 @@ const App: React.FC = () => {
         <ActivityIndicator size='large' color='#0000ff' />
       ) : (
         <>
-          <PagerView
-            style={styles.pagerView}
-            initialPage={0}
-            onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
-          >
-            {questions.map((question, index) => (
-              <QuestionPage
-                key={index}
-                question={question}
-                answer={answer}
-                onAnswerChange={setAnswer}
-              />
-            ))}
-          </PagerView>
+          <FlatList
+            data={questions}
+            renderItem={renderItem}
+            keyExtractor={(_, index) => index.toString()}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={handleScroll}
+            style={styles.flatList}
+          />
           <PageIndicator count={questions.length} currentIndex={currentPage} />
         </>
       )}
@@ -47,7 +67,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  pagerView: {
+  flatList: {
+    flex: 1,
+  },
+  pageContainer: {
     flex: 1,
   },
 });
