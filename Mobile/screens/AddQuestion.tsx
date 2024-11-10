@@ -6,74 +6,196 @@ import {
   TouchableOpacity,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
-  Keyboard,
+  FlatList,
   Alert,
 } from 'react-native';
-import { ArrowLeft } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  Plus,
+  MoreVertical,
+  Edit2,
+  Trash2,
+} from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
+import { questions as mockQuestions } from '../mocks/questions.mocks';
+
+interface Question {
+  id: string;
+  question: string;
+}
 
 const AddQuestion: React.FC = () => {
+  const [isAddingNew, setIsAddingNew] = useState(false);
   const [newQuestion, setNewQuestion] = useState('');
+  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const navigation = useNavigation();
+  const [questions, setQuestions] = useState<Question[]>(mockQuestions);
 
-  const handleSubmit = () => {
+  const handleAddNew = () => {
     if (newQuestion.trim()) {
-      // Here you would typically add the question to your questions list
-      Alert.alert('Success', 'Question added successfully!');
+      setQuestions([
+        ...questions,
+        { id: Date.now().toString(), question: newQuestion.trim() },
+      ]);
       setNewQuestion('');
-      navigation.goBack();
-    } else {
-      Alert.alert('Error', 'Please enter a question');
+      setIsAddingNew(false);
     }
   };
 
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.safeArea}>
-        {/* Custom Header */}
-        <View style={styles.header}>
+  const handleEdit = (question: Question) => {
+    setEditingQuestion(question);
+    setNewQuestion(question.question);
+    setIsAddingNew(true);
+    setSelectedQuestion(null);
+  };
+
+  const handleUpdate = () => {
+    if (editingQuestion && newQuestion.trim()) {
+      setQuestions(
+        questions.map((q) =>
+          q.id === editingQuestion.id
+            ? { ...q, question: newQuestion.trim() }
+            : q
+        )
+      );
+      setNewQuestion('');
+      setIsAddingNew(false);
+      setEditingQuestion(null);
+    }
+  };
+
+  const handleDelete = (questionId: string) => {
+    Alert.alert(
+      'Delete Question',
+      'Are you sure you want to delete this question?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setQuestions(questions.filter((q) => q.id !== questionId));
+            setSelectedQuestion(null);
+          },
+        },
+      ]
+    );
+  };
+
+  const renderQuestion = ({ item }: { item: Question }) => {
+    const isSelected = selectedQuestion === item.id;
+
+    return (
+      <View style={styles.questionCard}>
+        <View style={styles.questionHeader}>
+          <Text style={styles.questionText}>{item.question}</Text>
           <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => setSelectedQuestion(isSelected ? null : item.id)}
           >
-            <ArrowLeft color="#000" size={24} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>New Question</Text>
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              !newQuestion.trim() && styles.saveButtonDisabled
-            ]}
-            onPress={handleSubmit}
-            disabled={!newQuestion.trim()}
-          >
-            <Text style={[
-              styles.saveButtonText,
-              !newQuestion.trim() && styles.saveButtonTextDisabled
-            ]}>
-              Save
-            </Text>
+            <MoreVertical color='#666' size={20} />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.container}>
-          <Text style={styles.label}>Question</Text>
-          <TextInput
-            style={styles.input}
-            value={newQuestion}
-            onChangeText={setNewQuestion}
-            placeholder="Type your question here..."
-            multiline
-            textAlignVertical="top"
-            autoFocus
-          />
-          <Text style={styles.hint}>
-            Good questions are clear, open-ended, and encourage reflection.
+        {isSelected && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.editButton]}
+              onPress={() => handleEdit(item)}
+            >
+              <Edit2 size={16} color='#87CEFA' />
+              <Text style={[styles.actionButtonText, styles.editButtonText]}>
+                Edit
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.deleteButton]}
+              onPress={() => handleDelete(item.id)}
+            >
+              <Trash2 size={16} color='#FF6B6B' />
+              <Text style={[styles.actionButtonText, styles.deleteButtonText]}>
+                Delete
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <ArrowLeft color='#000' size={24} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Questions</Text>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => {
+            setIsAddingNew(true);
+            setEditingQuestion(null);
+            setNewQuestion('');
+          }}
+        >
+          <Plus color='#87CEFA' size={24} />
+        </TouchableOpacity>
+      </View>
+
+      {isAddingNew ? (
+        <View style={styles.addContainer}>
+          <Text style={styles.label}>
+            {editingQuestion ? 'Edit Question' : 'New Question'}
           </Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              value={newQuestion}
+              onChangeText={setNewQuestion}
+              placeholder='Type your question here...'
+              multiline
+              autoFocus
+            />
+          </View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={() => {
+                setIsAddingNew(false);
+                setNewQuestion('');
+                setEditingQuestion(null);
+              }}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                styles.saveButton,
+                !newQuestion.trim() && styles.saveButtonDisabled,
+              ]}
+              onPress={editingQuestion ? handleUpdate : handleAddNew}
+              disabled={!newQuestion.trim()}
+            >
+              <Text style={styles.saveButtonText}>
+                {editingQuestion ? 'Update' : 'Save'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+      ) : (
+        <FlatList
+          data={questions}
+          renderItem={renderQuestion}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContainer}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      )}
+    </SafeAreaView>
   );
 };
 
@@ -101,25 +223,72 @@ const styles = StyleSheet.create({
     padding: 8,
     marginLeft: -8,
   },
-  saveButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
+  addButton: {
+    padding: 8,
   },
-  saveButtonDisabled: {
-    opacity: 0.5,
+  listContainer: {
+    padding: 16,
   },
-  saveButtonText: {
-    color: '#87CEFA',
-    fontWeight: '600',
-    fontSize: 16,
+  questionCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  saveButtonTextDisabled: {
-    color: '#87CEFA',
+  questionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
-  container: {
-    padding: 20,
+  questionText: {
     flex: 1,
+    fontSize: 16,
+    color: '#333',
+    marginRight: 8,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 6,
+    marginRight: 12,
+  },
+  actionButtonText: {
+    marginLeft: 4,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  editButton: {
+    backgroundColor: '#E6F4FF',
+  },
+  deleteButton: {
+    backgroundColor: '#FFE6E6',
+  },
+  editButtonText: {
+    color: '#87CEFA',
+  },
+  deleteButtonText: {
+    color: '#FF6B6B',
+  },
+  separator: {
+    height: 12,
+  },
+  addContainer: {
+    padding: 20,
   },
   label: {
     fontSize: 16,
@@ -127,20 +296,49 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 8,
   },
-  input: {
+  inputContainer: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 16,
-    minHeight: 120,
-    fontSize: 16,
     backgroundColor: 'white',
   },
-  hint: {
-    fontSize: 14,
+  input: {
+    padding: 16,
+    fontSize: 16,
+    minHeight: 120,
+    textAlignVertical: 'top',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 16,
+    gap: 12,
+  },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f1f1f1',
+  },
+  cancelButtonText: {
     color: '#666',
-    marginTop: 12,
-    fontStyle: 'italic',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  saveButton: {
+    backgroundColor: '#87CEFA',
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 
