@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"API/internal/database"
 	"API/internal/models"
@@ -15,8 +18,30 @@ type QuestionHandler struct {
 	DB *database.Database
 }
 
+func (h *QuestionHandler) generateUniqueID() string {
+	for {
+		// Generate a random 5-digit number
+		id := fmt.Sprintf("%05d", rand.Intn(100000))
+
+		// Check if the ID already exists
+		var exists bool
+		err := h.DB.Conn.QueryRow("SELECT EXISTS(SELECT 1 FROM questions WHERE id = ?)", id).Scan(&exists)
+		if err != nil {
+			// If there's an error, log it but continue trying
+			continue
+		}
+
+		// If the ID doesn't exist, return it
+		if !exists {
+			return id
+		}
+	}
+}
+
 // NewQuestionHandler creates a new QuestionHandler
 func NewQuestionHandler(db *database.Database) *QuestionHandler {
+	// Create a new random source and generator
+	rand.NewSource(time.Now().UnixNano())
 	return &QuestionHandler{DB: db}
 }
 
@@ -36,6 +61,9 @@ func (h *QuestionHandler) AddQuestion(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Question cannot be empty", http.StatusBadRequest)
 		return
 	}
+
+	// Generate a unique ID
+	question.ID = h.generateUniqueID()
 
 	// Insert question into database
 	insertSQL := `INSERT INTO questions (id, question) VALUES (?, ?)`
