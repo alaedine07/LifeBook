@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -8,6 +8,7 @@ import {
   Text,
   FlatList,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {
   ArrowLeft,
@@ -17,12 +18,8 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { questions as mockQuestions } from '../mocks/questions.mocks';
-
-interface Question {
-  id: string;
-  question: string;
-}
+import { Question } from '../interfaces/question';
+import { QuestionService } from '../services/questions_service';
 
 const AddQuestion: React.FC = () => {
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -30,16 +27,40 @@ const AddQuestion: React.FC = () => {
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const navigation = useNavigation();
-  const [questions, setQuestions] = useState<Question[]>(mockQuestions);
+  const [isLoading, setIsLoading] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([]);
 
-  const handleAddNew = () => {
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
+  const fetchQuestions = async () => {
+    try {
+      setIsLoading(true);
+      const fetchedQuestions = await QuestionService.fetchQuestions();
+      setQuestions(fetchedQuestions);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load questions');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddNew = async () => {
     if (newQuestion.trim()) {
-      setQuestions([
-        ...questions,
-        { id: Date.now().toString(), question: newQuestion.trim() },
-      ]);
-      setNewQuestion('');
-      setIsAddingNew(false);
+      try {
+        setIsLoading(true);
+        const addedQuestion = await QuestionService.addQuestion(
+          newQuestion.trim()
+        );
+        setQuestions([addedQuestion, ...questions]);
+        setNewQuestion('');
+        setIsAddingNew(false);
+      } catch (error) {
+        Alert.alert('Error', 'Failed to add question');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -50,18 +71,27 @@ const AddQuestion: React.FC = () => {
     setSelectedQuestion(null);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (editingQuestion && newQuestion.trim()) {
-      setQuestions(
-        questions.map((q) =>
-          q.id === editingQuestion.id
-            ? { ...q, question: newQuestion.trim() }
-            : q
-        )
-      );
-      setNewQuestion('');
-      setIsAddingNew(false);
-      setEditingQuestion(null);
+      try {
+        setIsLoading(true);
+        const updatedQuestion = await QuestionService.updateQuestion(
+          editingQuestion.id,
+          newQuestion.trim()
+        );
+        setQuestions(
+          questions.map((q) =>
+            q.id === updatedQuestion.id ? updatedQuestion : q
+          )
+        );
+        setNewQuestion('');
+        setIsAddingNew(false);
+        setEditingQuestion(null);
+      } catch (error) {
+        Alert.alert('Error', 'Failed to update question');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -74,9 +104,17 @@ const AddQuestion: React.FC = () => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            setQuestions(questions.filter((q) => q.id !== questionId));
-            setSelectedQuestion(null);
+          onPress: async () => {
+            try {
+              setIsLoading(true);
+              await QuestionService.deleteQuestion(questionId);
+              setQuestions(questions.filter((q) => q.id !== questionId));
+              setSelectedQuestion(null);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete question');
+            } finally {
+              setIsLoading(false);
+            }
           },
         },
       ]
@@ -145,6 +183,12 @@ const AddQuestion: React.FC = () => {
         </TouchableOpacity>
       </View>
 
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size='large' color='#87CEFA' />
+        </View>
+      )}
+
       {isAddingNew ? (
         <View style={styles.addContainer}>
           <Text style={styles.label}>
@@ -178,7 +222,7 @@ const AddQuestion: React.FC = () => {
                 !newQuestion.trim() && styles.saveButtonDisabled,
               ]}
               onPress={editingQuestion ? handleUpdate : handleAddNew}
-              disabled={!newQuestion.trim()}
+              disabled={!newQuestion.trim() || isLoading}
             >
               <Text style={styles.saveButtonText}>
                 {editingQuestion ? 'Update' : 'Save'}
@@ -200,6 +244,17 @@ const AddQuestion: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#f8f9fa',
