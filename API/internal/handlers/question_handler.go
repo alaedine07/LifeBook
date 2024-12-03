@@ -97,6 +97,10 @@ func (h *QuestionHandler) GetQuestions(w http.ResponseWriter, r *http.Request) {
 		questions = append(questions, q)
 	}
 
+	if len(questions) == 0 {
+		questions = []models.Question{} // Explicitly create an empty slice
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(questions)
 }
