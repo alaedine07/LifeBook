@@ -27,6 +27,7 @@ func main() {
 
 	// Define routes
 	r.HandleFunc("/questions", questionHandler.GetQuestions).Methods("GET")
+	r.HandleFunc("/questions/{id}", questionHandler.GetQuestionById).Methods("GET")
 	r.HandleFunc("/questions", questionHandler.AddQuestion).Methods("POST")
 	r.HandleFunc("/questions/{id}", questionHandler.UpdateQuestion).Methods("PUT")
 	r.HandleFunc("/questions/{id}", questionHandler.DeleteQuestion).Methods("DELETE")

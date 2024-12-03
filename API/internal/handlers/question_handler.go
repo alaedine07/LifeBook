@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -98,6 +99,28 @@ func (h *QuestionHandler) GetQuestions(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(questions)
+}
+
+// GetQuestionById retrieves a single question by its ID
+func (h *QuestionHandler) GetQuestionById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	questionID := vars["id"]
+
+	var question models.Question
+	err := h.DB.Conn.QueryRow(`SELECT id, question FROM questions WHERE id = ?`, questionID).Scan(&question.ID, &question.Question)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// No question found with this ID
+			http.Error(w, "Question not found", http.StatusNotFound)
+			return
+		}
+		// Other database error
+		http.Error(w, "Failed to retrieve question", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(question)
 }
 
 // UpdateQuestion updates an existing question
