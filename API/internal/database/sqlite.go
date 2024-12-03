@@ -19,7 +19,7 @@ func New() *Database {
 	os.MkdirAll("./data", os.ModePerm)
 
 	// Open SQLite database
-	db, err := sql.Open("sqlite3", "./data/questions.db")
+	db, err := sql.Open("sqlite3", "./data/life_book_local.db")
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
 	}
