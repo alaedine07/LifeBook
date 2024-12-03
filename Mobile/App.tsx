@@ -18,20 +18,18 @@ const App: React.FC = () => {
         }}
       >
         <Tab.Screen
-          name="FillYourDay"
+          name='FillYourDay'
           component={FillYourDay}
           options={{
             tabBarLabel: 'Fill Your Day',
-            tabBarIcon: ({ color, size }) => (
-              <Home color={color} size={size} />
-            ),
+            tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
           }}
         />
         <Tab.Screen
-          name="AddQuestion"
+          name='AddQuestion'
           component={AddQuestion}
           options={{
-            tabBarLabel: 'Add Question',
+            tabBarLabel: 'Reflections',
             tabBarIcon: ({ color, size }) => (
               <PlusCircle color={color} size={size} />
             ),
