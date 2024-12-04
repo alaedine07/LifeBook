@@ -25,15 +25,44 @@ func New() *Database {
 	}
 
 	// Create questions table if not exists
-	createTableSQL := `
+	createQuestionsTableSQL := `
 	CREATE TABLE IF NOT EXISTS questions (
 		id TEXT PRIMARY KEY,
 		question TEXT NOT NULL
 	);`
 
-	_, err = db.Exec(createTableSQL)
+	// Create day_entries table if not exists
+	createDayEntriesTableSQL := `
+	CREATE TABLE IF NOT EXISTS day_entries (
+		id TEXT PRIMARY KEY,
+		date TEXT NOT NULL UNIQUE
+	);`
+
+	// Create question_responses table if not exists
+	createResponsesTableSQL := `
+	CREATE TABLE IF NOT EXISTS question_responses (
+		id TEXT PRIMARY KEY,
+		day_entry_id TEXT NOT NULL,
+		question_id TEXT NOT NULL,
+		answer TEXT NOT NULL,
+		FOREIGN KEY(day_entry_id) REFERENCES day_entries(id),
+		FOREIGN KEY(question_id) REFERENCES questions(id)
+	);`
+
+	// Execute table creation statements
+	_, err = db.Exec(createQuestionsTableSQL)
 	if err != nil {
-		log.Fatalf("Failed to create table: %v", err)
+		log.Fatalf("Failed to create questions table: %v", err)
+	}
+
+	_, err = db.Exec(createDayEntriesTableSQL)
+	if err != nil {
+		log.Fatalf("Failed to create day_entries table: %v", err)
+	}
+
+	_, err = db.Exec(createResponsesTableSQL)
+	if err != nil {
+		log.Fatalf("Failed to create question_responses table: %v", err)
 	}
 
 	return &Database{Conn: db}

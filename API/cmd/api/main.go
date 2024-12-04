@@ -18,6 +18,7 @@ func main() {
 
 	// Create question handler
 	questionHandler := handlers.NewQuestionHandler(db)
+	dayEntryHandler := handlers.NewDayEntryHandler(db)
 
 	// Create router
 	r := mux.NewRouter()
@@ -31,6 +32,11 @@ func main() {
 	r.HandleFunc("/questions", questionHandler.AddQuestion).Methods("POST")
 	r.HandleFunc("/questions/{id}", questionHandler.UpdateQuestion).Methods("PUT")
 	r.HandleFunc("/questions/{id}", questionHandler.DeleteQuestion).Methods("DELETE")
+
+	// Day entry routes
+	r.HandleFunc("/day-entries", dayEntryHandler.AddDayEntry).Methods("POST")
+	r.HandleFunc("/day-entries", dayEntryHandler.ListDayEntries).Methods("GET")
+	r.HandleFunc("/day-entries/{date}", dayEntryHandler.GetDayEntryByDate).Methods("GET")
 
 	// Start server
 	log.Println("Server starting on :8080")
