@@ -36,7 +36,8 @@ func main() {
 	// Day entry routes
 	r.HandleFunc("/day-entries", dayEntryHandler.AddDayEntry).Methods("POST")
 	r.HandleFunc("/day-entries", dayEntryHandler.ListDayEntries).Methods("GET")
-	r.HandleFunc("/day-entries/{date}", dayEntryHandler.GetDayEntryByDate).Methods("GET")
+	r.HandleFunc("/day-entries/day/{date}", dayEntryHandler.GetDayEntryByDate).Methods("GET")
+	r.HandleFunc("/day-entries/{id}", dayEntryHandler.GetDayEntryById).Methods("GET")
 
 	// Start server
 	log.Println("Server starting on :8080")

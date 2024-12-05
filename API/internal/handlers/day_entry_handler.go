@@ -249,3 +249,65 @@ func (h *DayEntryHandler) ListDayEntries(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(dayEntries)
 }
+
+// GetDayEntryById retrieves a day entry by given id
+func (h *DayEntryHandler) GetDayEntryById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	dayEntryId := vars["id"]
+
+	// Find the day entry
+	var dayEntry models.DayEntry
+	var dayEntryID string
+	var storedDateStr string
+	err := h.DB.Conn.QueryRow(`SELECT id, date FROM day_entries WHERE id = ?`, dayEntryId).Scan(&dayEntryID, &storedDateStr)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "No entry found for this id", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Failed to retrieve day entry", http.StatusInternalServerError)
+		return
+	}
+
+	// Parse the stored date string
+	parsedDate, err := time.Parse(time.RFC3339, storedDateStr)
+	if err != nil {
+		http.Error(w, "Failed to parse stored date", http.StatusInternalServerError)
+		return
+	}
+	dayEntry.ID = dayEntryID
+	dayEntry.Date = parsedDate
+
+	// Retrieve responses for this day entry
+	rows, err := h.DB.Conn.Query(`
+		SELECT qr.question_id, q.question, qr.answer
+		FROM question_responses qr
+		JOIN questions q ON qr.question_id = q.id
+		WHERE qr.day_entry_id = ?
+	`, dayEntryID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve responses", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var responses []models.QuestionResponse
+	for rows.Next() {
+		var response models.QuestionResponse
+		var questionText string
+		if err := rows.Scan(&response.QuestionID, &questionText, &response.Answer); err != nil {
+			http.Error(w, "Error scanning responses", http.StatusInternalServerError)
+			return
+		}
+		responses = append(responses, response)
+	}
+
+	dayEntry = models.DayEntry{
+		ID:        dayEntryID,
+		Date:      dayEntry.Date,
+		Responses: responses,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(dayEntry)
+}
