@@ -17,13 +17,16 @@ import { useNavigation } from '@react-navigation/native';
 import { PlusCircle } from 'lucide-react-native';
 import { RootStackParamList } from '../types';
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
+import { Question } from '../interfaces/question';
+import { DayEntryService } from '../services/day_entry_service';
 
 const windowWidth = Dimensions.get('window').width;
 
 const FillYourDay: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [questions, setQuestions] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [answers, setAnswers] = useState<Array<[string, string]>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState<number>(0);
 
@@ -34,10 +37,7 @@ const FillYourDay: React.FC = () => {
   const fetchQuestions = async () => {
     try {
       setIsLoading(true);
-      const fetchedQuestions = await QuestionService.fetchQuestions();
-      // Extract just the question text
-      const questionTexts = fetchedQuestions.map((q) => q.question);
-      setQuestions(questionTexts);
+      setQuestions(await QuestionService.fetchQuestions());
     } catch (error) {
       Alert.alert('Error', 'Failed to load questions');
     } finally {
@@ -51,9 +51,17 @@ const FillYourDay: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const renderItem = ({ item: question }: { item: string; index: number }) => (
+  const renderItem = ({
+    item: question,
+  }: {
+    item: Question;
+    index: number;
+  }) => (
     <View style={[styles.pageContainer, { width: windowWidth }]}>
-      <QuestionAnswer question={question} />
+      <QuestionAnswer
+        question={question}
+        onAddNewAnswer={handleNewAnswerSubmit}
+      />
     </View>
   );
 
@@ -67,6 +75,15 @@ const FillYourDay: React.FC = () => {
     };
     return now.toLocaleDateString('en-US', options);
   };
+
+  const handleNewAnswerSubmit = (questionId: string, answer: string) => {
+    setAnswers((prevAnswers) => [...prevAnswers, [questionId, answer]]);
+  };
+
+  function SaveDay(): void {
+    DayEntryService.saveDayEntry(answers);
+    Alert.alert('Success', 'Your answers have been saved!');
+  }
 
   if (isLoading) {
     return (
@@ -123,10 +140,7 @@ const FillYourDay: React.FC = () => {
           <Text style={styles.headerTitle}>Fill Your Day</Text>
           <Text style={styles.dateText}>{getFormattedDate()}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.addButton} onPress={() => SaveDay()}>
           <PlusCircle color='#87CEFA' size={24} />
         </TouchableOpacity>
       </View>
@@ -140,8 +154,8 @@ const FillYourDay: React.FC = () => {
         <>
           <FlatList
             data={questions}
+            keyExtractor={(index) => index.id.toString()}
             renderItem={renderItem}
-            keyExtractor={(_, index) => index.toString()}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}

@@ -16,6 +16,7 @@ import {
   KeyboardEvent,
 } from 'react-native';
 import { Send, ChevronDown, ChevronUp, Edit2, X } from 'lucide-react-native';
+import { Question } from '../interfaces/question';
 
 interface Answer {
   id: string;
@@ -24,13 +25,17 @@ interface Answer {
 }
 
 interface QuestionAnswerProps {
-  question: string;
+  question: Question;
+  onAddNewAnswer: (questionId: string, answer: string) => void;
 }
 
 const MAX_COLLAPSED_LENGTH = 400;
 const windowWidth = Dimensions.get('window').width;
 
-const QuestionAnswer: React.FC<QuestionAnswerProps> = ({ question }) => {
+const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
+  question,
+  onAddNewAnswer,
+}) => {
   const [answer, setAnswer] = useState('');
   const [submittedAnswers, setSubmittedAnswers] = useState<Answer[]>([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -74,6 +79,7 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({ question }) => {
         },
         ...submittedAnswers,
       ]);
+      onAddNewAnswer(question.id, answer);
       setAnswer('');
       Keyboard.dismiss();
     }
@@ -200,7 +206,7 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({ question }) => {
     >
       <View style={styles.container}>
         <View style={styles.topSection}>
-          <Text style={styles.question}>{question}</Text>
+          <Text style={styles.question}>{question.question}</Text>
 
           <View style={styles.inputContainer}>
             <TextInput
