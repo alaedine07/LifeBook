@@ -1,43 +1,55 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Home, PlusCircle } from 'lucide-react-native';
-import FillYourDay from './screens/FillYourDay';
 import AddQuestion from './screens/AddQuestion';
+import DayEntriesList from './screens/DayEntriesList';
+import FillYourDay from './screens/FillYourDay';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-const App: React.FC = () => {
-  return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{
-          tabBarActiveTintColor: '#87CEFA',
-          tabBarInactiveTintColor: 'gray',
-          headerShown: false,
-        }}
-      >
-        <Tab.Screen
-          name='FillYourDay'
-          component={FillYourDay}
-          options={{
-            tabBarLabel: 'Fill Your Day',
-            tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
-          }}
-        />
-        <Tab.Screen
-          name='AddQuestion'
-          component={AddQuestion}
-          options={{
-            tabBarLabel: 'Reflections',
-            tabBarIcon: ({ color, size }) => (
-              <PlusCircle color={color} size={size} />
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
-  );
-};
+const TabNavigator: React.FC = () => (
+  <Tab.Navigator
+    screenOptions={{
+      tabBarActiveTintColor: '#87CEFA',
+      tabBarInactiveTintColor: 'gray',
+      headerShown: false,
+    }}
+  >
+    <Tab.Screen
+      name='DayEntriesList'
+      component={DayEntriesList}
+      options={{
+        tabBarLabel: 'Fill your day',
+        tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+      }}
+    />
+    <Tab.Screen
+      name='AddQuestion'
+      component={AddQuestion}
+      options={{
+        tabBarLabel: 'Reflections',
+        tabBarIcon: ({ color, size }) => (
+          <PlusCircle color={color} size={size} />
+        ),
+      }}
+    />
+  </Tab.Navigator>
+);
+
+const App: React.FC = () => (
+  <NavigationContainer>
+    <Stack.Navigator>
+      <Stack.Screen
+        name='Previous'
+        component={TabNavigator}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name='FillYourDay' component={FillYourDay} />
+    </Stack.Navigator>
+  </NavigationContainer>
+);
 
 export default App;

@@ -1,5 +1,5 @@
-export const questions = [
-  { id: '1', question: 'What did you enjoy most about your day?' },
-  { id: '2', question: 'What was challenging for you?' },
-  { id: '3', question: 'What are you grateful for?' },
+export const questionsMock = [
+  { id: '36182', question: 'What did you do today?' },
+  { id: '36183', question: 'What was challenging for you?' },
+  { id: '36184', question: 'What are you grateful for?' },
 ];
