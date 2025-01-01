@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,27 +6,22 @@ import {
   SafeAreaView,
   TouchableOpacity,
   FlatList,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 import { ChevronRight } from 'lucide-react-native';
 
-import { daysEntryMock } from '../mocks/day_entry.mocks';
 import { questionsMock } from '../mocks/questions.mocks';
-
-interface DayEntry {
-  id: string;
-  date: string;
-  responses: Array<{
-    question_id: string;
-    answer: string;
-  }>;
-}
+import { DayEntry } from '../interfaces/day_entry';
+import { DayEntryService } from '../services/day_entry_service';
 
 const DayEntriesList: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [days, setDays] = useState<DayEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -38,13 +33,31 @@ const DayEntriesList: React.FC = () => {
     });
   };
 
+  useEffect(() => {
+    fetchDays();
+  }, []);
+
+  const fetchDays = async () => {
+    try {
+      setIsLoading(true);
+      await setDays(await DayEntryService.fetchDays());
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load days');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderDayEntry = ({ item }: { item: DayEntry }) => {
-    const uniqueQuestionsAnswered = new Set(
-      item.responses.map((response) => response.question_id)
-    ).size;
+    const uniqueQuestionsAnswered = item.responses
+      ? new Set(item.responses.map((response) => response.question_id)).size
+      : 0;
 
     return (
-      <TouchableOpacity style={styles.entryCard} onPress={() => {}}>
+      <TouchableOpacity
+        style={styles.entryCard}
+        onPress={() => navigation.navigate('FillYourDay', { item })}
+      >
         <View style={styles.entryHeader}>
           <Text style={styles.entryDate}>{formatDate(item.date)}</Text>
           <ChevronRight color='#87CEFA' size={24} />
@@ -65,14 +78,14 @@ const DayEntriesList: React.FC = () => {
       <View style={styles.addEntryContainer}>
         <TouchableOpacity
           style={styles.addEntryButton}
-          onPress={() => navigation.navigate('FillYourDay')}
+          onPress={() => navigation.navigate('FillYourDay', {})}
         >
           <Text style={styles.addEntryButtonText}>Add your day</Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={daysEntryMock}
+        data={days}
         renderItem={renderDayEntry}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
