@@ -10,16 +10,16 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types';
+import { AppNavigationParams } from '../types';
 import { ChevronRight } from 'lucide-react-native';
 
-import { questionsMock } from '../mocks/questions.mocks';
-import { DayEntry } from '../interfaces/day_entry';
-import { DayEntryService } from '../services/day_entry_service';
+import { mockQuestions } from '../mocks/questions.mocks';
+import { DayEntry } from '../interfaces/day_entry.types';
+import { DayEntryService } from '../services/DayEntryAPI';
 
 const DayEntriesList: React.FC = () => {
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    useNavigation<NativeStackNavigationProp<AppNavigationParams>>();
   const [days, setDays] = useState<DayEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -63,7 +63,7 @@ const DayEntriesList: React.FC = () => {
           <ChevronRight color='#87CEFA' size={24} />
         </View>
         <Text>
-          {uniqueQuestionsAnswered} / {questionsMock.length} Questions Answered
+          {uniqueQuestionsAnswered} / {mockQuestions.length} Questions Answered
         </Text>
       </TouchableOpacity>
     );

@@ -1,4 +1,4 @@
-import { DayEntry } from '../interfaces/day_entry';
+import { DayEntry } from '../interfaces/day_entry.types';
 
 const API_BASE_URL = 'http://172.20.10.5:8080';
 

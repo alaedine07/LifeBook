@@ -1,6 +1,6 @@
-import { DayEntry } from '../interfaces/day_entry';
+import { DayEntry } from '../interfaces/day_entry.types';
 
-export type RootStackParamList = {
+export type AppNavigationParams = {
   FillYourDay: { item?: DayEntry };
   DaysEntries: undefined;
   AddQuestion: undefined;

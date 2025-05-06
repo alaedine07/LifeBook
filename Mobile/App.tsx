@@ -4,8 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Home, PlusCircle } from 'lucide-react-native';
 import AddQuestion from './screens/AddQuestion';
-import DayEntriesList from './screens/DayEntriesList';
-import FillYourDay from './screens/FillYourDay';
+import DayEntriesList from './screens/DayEntries';
+import FillYourDay from './screens/DayEntryForm';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();

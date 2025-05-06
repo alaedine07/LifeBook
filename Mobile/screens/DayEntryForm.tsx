@@ -12,19 +12,19 @@ import {
 } from 'react-native';
 import QuestionAnswer from '../components/QuestionAnswer';
 import PageIndicator from '../components/PageIndicator';
-import { QuestionService } from '../services/questions_service';
+import { QuestionService } from '../services/QuestionAPI';
 import { useNavigation } from '@react-navigation/native';
 import { PlusCircle } from 'lucide-react-native';
-import { RootStackParamList } from '../types';
+import { AppNavigationParams } from '../types';
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
 import { Question } from '../interfaces/question';
-import { DayEntryService } from '../services/day_entry_service';
+import { DayEntryService } from '../services/DayEntryAPI';
 
 const windowWidth = Dimensions.get('window').width;
 
 const FillYourDay: React.FC = () => {
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    useNavigation<NativeStackNavigationProp<AppNavigationParams>>();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Array<[string, string]>>([]);
   const [isLoading, setIsLoading] = useState(true);

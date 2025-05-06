@@ -19,7 +19,7 @@ import {
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Question } from '../interfaces/question';
-import { QuestionService } from '../services/questions_service';
+import { QuestionService } from '../services/QuestionAPI';
 
 const AddQuestion: React.FC = () => {
   const [isAddingNew, setIsAddingNew] = useState(false);
