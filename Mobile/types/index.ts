@@ -1,5 +1,7 @@
+import { DayEntry } from '../interfaces/day_entry';
+
 export type RootStackParamList = {
-  FillYourDay: undefined;
+  FillYourDay: { item?: DayEntry };
   DaysEntries: undefined;
   AddQuestion: undefined;
   // Add other screen names as needed
