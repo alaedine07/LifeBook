@@ -16,22 +16,13 @@ import { ChevronRight } from 'lucide-react-native';
 import { mockQuestions } from '../mocks/questions.mocks';
 import { DayEntry } from '../interfaces/day_entry.types';
 import { DayEntryService } from '../services/DayEntryAPI';
+import { formatDate } from '../utils/dateUtils';
 
 const DayEntriesList: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<AppNavigationParams>>();
   const [days, setDays] = useState<DayEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   useEffect(() => {
     fetchDays();

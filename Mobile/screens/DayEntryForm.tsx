@@ -80,9 +80,13 @@ const FillYourDay: React.FC = () => {
     setAnswers((prevAnswers) => [...prevAnswers, [questionId, answer]]);
   };
 
-  function SaveDay(): void {
-    DayEntryService.saveDayEntry(answers);
-    Alert.alert('Success', 'Your answers have been saved!');
+  async function SaveDay(): Promise<void> {
+    try {
+      await DayEntryService.saveDayEntry(answers);
+      Alert.alert('Success', 'Your answers have been saved!');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save your answers. Please try again.');
+    }
   }
 
   if (isLoading) {
