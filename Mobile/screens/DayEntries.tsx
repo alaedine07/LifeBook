@@ -18,7 +18,7 @@ import { DayEntry } from '../interfaces/day_entry.types';
 import { DayEntryService } from '../services/DayEntryAPI';
 import { formatDate } from '../utils/dateUtils';
 
-const DayEntriesList: React.FC = () => {
+const DayEntries: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<AppNavigationParams>>();
   const [days, setDays] = useState<DayEntry[]>([]);
@@ -153,4 +153,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DayEntriesList;
+export default DayEntries;

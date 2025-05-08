@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Home, PlusCircle } from 'lucide-react-native';
 import AddQuestion from './screens/AddQuestion';
-import DayEntriesList from './screens/DayEntries';
+import DayEntries from './screens/DayEntries';
 import FillYourDay from './screens/DayEntryForm';
 
 const Tab = createBottomTabNavigator();
@@ -19,8 +19,8 @@ const TabNavigator: React.FC = () => (
     }}
   >
     <Tab.Screen
-      name='DayEntriesList'
-      component={DayEntriesList}
+      name='DayEntries'
+      component={DayEntries}
       options={{
         tabBarLabel: 'Fill your day',
         tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
@@ -48,6 +48,7 @@ const App: React.FC = () => (
         options={{ headerShown: false }}
       />
       <Stack.Screen name='FillYourDay' component={FillYourDay} />
+      <Stack.Screen name="DayEntries" component={DayEntries} />
     </Stack.Navigator>
   </NavigationContainer>
 );

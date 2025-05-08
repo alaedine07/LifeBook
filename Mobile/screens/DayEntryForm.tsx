@@ -84,6 +84,10 @@ const FillYourDay: React.FC = () => {
     try {
       await DayEntryService.saveDayEntry(answers);
       Alert.alert('Success', 'Your answers have been saved!');
+      // Add a delay before navigating
+      setTimeout(() => {
+        navigation.navigate('DayEntries');
+      }, 1000);
     } catch (error) {
       Alert.alert('Error', 'Failed to save your answers. Please try again.');
     }
