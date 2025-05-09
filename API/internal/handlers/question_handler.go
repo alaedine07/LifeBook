@@ -67,7 +67,9 @@ func (h *QuestionHandler) AddQuestion(w http.ResponseWriter, r *http.Request) {
 	question.ID = h.generateUniqueID()
 
 	// Insert question into database
-	insertSQL := `INSERT INTO questions (id, question) VALUES (?, ?)`
+	insertSQL := `
+		INSERT INTO questions (id, question, created_at, updated_at)
+		VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
 	_, err = h.DB.Conn.Exec(insertSQL, question.ID, question.Question)
 	if err != nil {
 		http.Error(w, "Failed to add question", http.StatusInternalServerError)
@@ -80,7 +82,9 @@ func (h *QuestionHandler) AddQuestion(w http.ResponseWriter, r *http.Request) {
 
 // GetQuestions retrieves all questions
 func (h *QuestionHandler) GetQuestions(w http.ResponseWriter, r *http.Request) {
-	rows, err := h.DB.Conn.Query("SELECT id, question FROM questions")
+	rows, err := h.DB.Conn.Query(`
+		SELECT id, question, created_at, updated_at
+		FROM questions`)
 	if err != nil {
 		http.Error(w, "Failed to retrieve questions", http.StatusInternalServerError)
 		return
@@ -90,7 +94,7 @@ func (h *QuestionHandler) GetQuestions(w http.ResponseWriter, r *http.Request) {
 	var questions []models.Question
 	for rows.Next() {
 		var q models.Question
-		if err := rows.Scan(&q.ID, &q.Question); err != nil {
+		if err := rows.Scan(&q.ID, &q.Question, &q.CreatedAt, &q.UpdatedAt); err != nil {
 			http.Error(w, "Error scanning questions", http.StatusInternalServerError)
 			return
 		}
@@ -140,7 +144,10 @@ func (h *QuestionHandler) UpdateQuestion(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Update question in database
-	updateSQL := `UPDATE questions SET question = ? WHERE id = ?`
+	updateSQL := `
+		UPDATE questions
+		SET question = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?`
 	result, err := h.DB.Conn.Exec(updateSQL, question.Question, questionID)
 	if err != nil {
 		http.Error(w, "Failed to update question", http.StatusInternalServerError)

@@ -69,7 +69,9 @@ func (h *DayEntryHandler) AddDayEntry(w http.ResponseWriter, r *http.Request) {
 	dayEntry.ID = h.generateUniqueID()
 
 	// Insert day entry
-	insertDayEntrySQL := `INSERT INTO day_entries (id, date) VALUES (?, ?)`
+	insertDayEntrySQL := `
+		INSERT INTO day_entries (id, date, created_at, updated_at)
+		VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
 	_, err = tx.Exec(insertDayEntrySQL, dayEntry.ID, dayEntry.Date.Format(time.RFC3339))
 	if err != nil {
 		http.Error(w, "Failed to add day entry", http.StatusInternalServerError)
@@ -134,9 +136,12 @@ func (h *DayEntryHandler) GetDayEntryByDate(w http.ResponseWriter, r *http.Reque
 
 	// Find the day entry
 	var dayEntry models.DayEntry
-	var dayEntryID string
-	var storedDateStr string
-	err = h.DB.Conn.QueryRow(`SELECT id, date FROM day_entries WHERE date = ?`, date.Format(time.RFC3339)).Scan(&dayEntryID, &storedDateStr)
+	var dayEntryID, storedDateStr string
+	var createdAt, updatedAt time.Time
+	err = h.DB.Conn.QueryRow(`
+		SELECT id, date, created_at, updated_at
+		FROM day_entries
+		WHERE date = ?`, date.Format(time.RFC3339)).Scan(&dayEntryID, &storedDateStr, &createdAt, &updatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "No entry found for this date", http.StatusNotFound)
@@ -154,6 +159,8 @@ func (h *DayEntryHandler) GetDayEntryByDate(w http.ResponseWriter, r *http.Reque
 	}
 	dayEntry.ID = dayEntryID
 	dayEntry.Date = parsedDate
+	dayEntry.CreatedAt = createdAt
+	dayEntry.UpdatedAt = updatedAt
 
 	// Retrieve responses for this day entry
 	rows, err := h.DB.Conn.Query(`
@@ -191,7 +198,9 @@ func (h *DayEntryHandler) GetDayEntryByDate(w http.ResponseWriter, r *http.Reque
 
 // ListDayEntries retrieves all day entries
 func (h *DayEntryHandler) ListDayEntries(w http.ResponseWriter, r *http.Request) {
-	rows, err := h.DB.Conn.Query(`SELECT id, date FROM day_entries`)
+	rows, err := h.DB.Conn.Query(`
+    SELECT id, date, created_at, updated_at
+    FROM day_entries`)
 	if err != nil {
 		http.Error(w, "Failed to retrieve day entries", http.StatusInternalServerError)
 		return
@@ -202,8 +211,7 @@ func (h *DayEntryHandler) ListDayEntries(w http.ResponseWriter, r *http.Request)
 	for rows.Next() {
 		var dayEntry models.DayEntry
 		var dateString string
-		if err := rows.Scan(&dayEntry.ID, &dateString); err != nil {
-			fmt.Println(err)
+		if err := rows.Scan(&dayEntry.ID, &dateString, &dayEntry.CreatedAt, &dayEntry.UpdatedAt); err != nil {
 			http.Error(w, "Error scanning day entries", http.StatusInternalServerError)
 			return
 		}
@@ -257,9 +265,12 @@ func (h *DayEntryHandler) GetDayEntryById(w http.ResponseWriter, r *http.Request
 
 	// Find the day entry
 	var dayEntry models.DayEntry
-	var dayEntryID string
-	var storedDateStr string
-	err := h.DB.Conn.QueryRow(`SELECT id, date FROM day_entries WHERE id = ?`, dayEntryId).Scan(&dayEntryID, &storedDateStr)
+	var dayEntryID, storedDateStr string
+	var createdAt, updatedAt time.Time
+	err := h.DB.Conn.QueryRow(`
+		SELECT id, date, created_at, updated_at
+		FROM day_entries
+		WHERE id = ?`, dayEntryId).Scan(&dayEntryID, &storedDateStr, &createdAt, &updatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "No entry found for this id", http.StatusNotFound)
@@ -277,6 +288,8 @@ func (h *DayEntryHandler) GetDayEntryById(w http.ResponseWriter, r *http.Request
 	}
 	dayEntry.ID = dayEntryID
 	dayEntry.Date = parsedDate
+	dayEntry.CreatedAt = createdAt
+	dayEntry.UpdatedAt = updatedAt
 
 	// Retrieve responses for this day entry
 	rows, err := h.DB.Conn.Query(`
