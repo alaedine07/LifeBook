@@ -1,4 +1,5 @@
 package models
+import "time"
 
 // Question represents a daily reflection question
 type Question struct {

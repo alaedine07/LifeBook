@@ -13,7 +13,7 @@ import {
 import QuestionAnswer from '../components/QuestionAnswer';
 import PageIndicator from '../components/PageIndicator';
 import { QuestionService } from '../services/QuestionAPI';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { PlusCircle } from 'lucide-react-native';
 import { AppNavigationParams } from '../types';
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
@@ -25,6 +25,8 @@ const windowWidth = Dimensions.get('window').width;
 const FillYourDay: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<AppNavigationParams>>();
+  const route = useRoute();
+  const dayEntry = (route as any).params?.item;
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Array<[string, string]>>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +35,17 @@ const FillYourDay: React.FC = () => {
   useEffect(() => {
     fetchQuestions();
   }, []);
+
+  useEffect(() => {
+    if (dayEntry?.responses) {
+      setAnswers(
+        dayEntry.responses.map((r: { question_id: string; answer: string }) => [
+          r.question_id,
+          r.answer,
+        ])
+      );
+    }
+  }, [dayEntry]);
 
   const fetchQuestions = async () => {
     try {
@@ -56,14 +69,21 @@ const FillYourDay: React.FC = () => {
   }: {
     item: Question;
     index: number;
-  }) => (
-    <View style={[styles.pageContainer, { width: windowWidth }]}>
-      <QuestionAnswer
-        question={question}
-        onAddNewAnswer={handleNewAnswerSubmit}
-      />
-    </View>
-  );
+  }) => {
+    const existingAnswer = dayEntry?.responses?.find(
+      (r: { question_id: string; }) => r.question_id === question.id
+    )?.answer;
+
+    return (
+      <View style={[styles.pageContainer, { width: windowWidth }]}>
+        <QuestionAnswer
+          question={question}
+          initialAnswer={existingAnswer}
+          onAddNewAnswer={handleNewAnswerSubmit}
+        />
+      </View>
+    );
+  };
 
   const getFormattedDate = (): string => {
     const now = new Date();

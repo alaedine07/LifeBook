@@ -26,6 +26,7 @@ interface Answer {
 
 interface QuestionAnswerProps {
   question: Question;
+  initialAnswer?: string;
   onAddNewAnswer: (questionId: string, answer: string) => void;
 }
 
@@ -34,16 +35,42 @@ const windowWidth = Dimensions.get('window').width;
 
 const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
   question,
+  initialAnswer,
   onAddNewAnswer,
 }) => {
-  const [answer, setAnswer] = useState('');
-  const [submittedAnswers, setSubmittedAnswers] = useState<Answer[]>([]);
+  const [answer, setAnswer] = useState(initialAnswer || '');
+  const [submittedAnswers, setSubmittedAnswers] = useState<Answer[]>(
+    initialAnswer
+      ? [
+          {
+            id: Date.now().toString(),
+            text: initialAnswer,
+            isExpanded: false,
+          },
+        ]
+      : []
+  );
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingAnswer, setEditingAnswer] = useState<Answer | null>(null);
   const [editText, setEditText] = useState('');
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [actionButtonsOpacity] = useState(new Animated.Value(0));
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    setAnswer(initialAnswer || '');
+    if (initialAnswer) {
+      setSubmittedAnswers([
+        {
+          id: Date.now().toString(),
+          text: initialAnswer,
+          isExpanded: false,
+        },
+      ]);
+    } else {
+      setSubmittedAnswers([]);
+    }
+  }, [initialAnswer]);
 
   useEffect(() => {
     const keyboardWillShow = (event: KeyboardEvent) => {
