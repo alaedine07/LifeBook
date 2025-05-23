@@ -71,7 +71,7 @@ const FillYourDay: React.FC = () => {
     index: number;
   }) => {
     const existingAnswer = dayEntry?.responses?.find(
-      (r: { question_id: string; }) => r.question_id === question.id
+      (r: { question_id: string }) => r.question_id === question.id
     )?.answer;
 
     return (

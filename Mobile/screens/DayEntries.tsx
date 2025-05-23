@@ -41,7 +41,11 @@ const DayEntries: React.FC = () => {
 
   const renderDayEntry = ({ item }: { item: DayEntry }) => {
     const uniqueQuestionsAnswered = item.responses
-      ? new Set(item.responses.map((response: { question_id: string }) => response.question_id)).size
+      ? new Set(
+          item.responses.map(
+            (response: { question_id: string }) => response.question_id
+          )
+        ).size
       : 0;
 
     return (
