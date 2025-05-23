@@ -38,6 +38,7 @@ func main() {
 	r.HandleFunc("/day-entries", dayEntryHandler.ListDayEntries).Methods("GET")
 	r.HandleFunc("/day-entries/day/{date}", dayEntryHandler.GetDayEntryByDate).Methods("GET")
 	r.HandleFunc("/day-entries/{id}", dayEntryHandler.GetDayEntryById).Methods("GET")
+	r.HandleFunc("/day-entries/{id}", dayEntryHandler.DeleteDayEntry).Methods("DELETE")
 
 	// Start server
 	log.Println("Server starting on :8080")

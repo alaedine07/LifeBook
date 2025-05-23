@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppNavigationParams } from '../types';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, Edit2, MoreVertical, Trash2 } from 'lucide-react-native';
 
 import { mockQuestions } from '../mocks/questions.mocks';
 import { DayEntry } from '../interfaces/day_entry.types';
@@ -23,6 +23,7 @@ const DayEntries: React.FC = () => {
     useNavigation<NativeStackNavigationProp<AppNavigationParams>>();
   const [days, setDays] = useState<DayEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -41,6 +42,29 @@ const DayEntries: React.FC = () => {
     }
   };
 
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      'Delete Entry',
+      'Are you sure you want to delete this day entry?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await DayEntryService.deleteDayEntry(id);
+              setDays(days.filter((d) => d.id !== id));
+              setSelectedEntryId(null);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete entry');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderDayEntry = ({ item }: { item: DayEntry }) => {
     const uniqueQuestionsAnswered = item.responses
       ? new Set(
@@ -50,19 +74,51 @@ const DayEntries: React.FC = () => {
         ).size
       : 0;
 
+    const isSelected = selectedEntryId === item.id;
+
     return (
-      <TouchableOpacity
-        style={styles.entryCard}
-        onPress={() => navigation.navigate('FillYourDay', { item })}
-      >
-        <View style={styles.entryHeader}>
+      <View style={styles.entryCard}>
+        <TouchableOpacity
+          style={styles.entryHeader}
+          onPress={() => navigation.navigate('FillYourDay', { item })}
+        >
           <Text style={styles.entryDate}>{formatDate(item.date)}</Text>
-          <ChevronRight color='#87CEFA' size={24} />
-        </View>
+        </TouchableOpacity>
         <Text>
           {uniqueQuestionsAnswered} / {mockQuestions.length} Questions Answered
         </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.moreButton}
+          onPress={() => setSelectedEntryId(isSelected ? null : item.id)}
+        >
+          <MoreVertical color='#666' size={20} />
+        </TouchableOpacity>
+        {isSelected && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.editButton]}
+              onPress={() => {
+                setSelectedEntryId(null);
+                navigation.navigate('FillYourDay', { item });
+              }}
+            >
+              <Edit2 size={16} color='#87CEFA' />
+              <Text style={[styles.actionButtonText, styles.editButtonText]}>
+                Edit
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.deleteButton]}
+              onPress={() => handleDelete(item.id)}
+            >
+              <Trash2 size={16} color='#FF6B6B' />
+              <Text style={[styles.actionButtonText, styles.deleteButtonText]}>
+                Delete
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
     );
   };
 
@@ -156,6 +212,46 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#000',
+  },
+  moreButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 8,
+    zIndex: 2,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 6,
+    marginRight: 12,
+  },
+  actionButtonText: {
+    marginLeft: 4,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  editButton: {
+    backgroundColor: '#E6F4FF',
+  },
+  deleteButton: {
+    backgroundColor: '#FFE6E6',
+  },
+  editButtonText: {
+    color: '#87CEFA',
+  },
+  deleteButtonText: {
+    color: '#FF6B6B',
   },
 });
 

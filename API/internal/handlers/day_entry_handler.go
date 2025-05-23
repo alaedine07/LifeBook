@@ -324,3 +324,42 @@ func (h *DayEntryHandler) GetDayEntryById(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(dayEntry)
 }
+
+// DeleteDayEntry removes a day entry and its responses by ID
+func (h *DayEntryHandler) DeleteDayEntry(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	dayEntryId := vars["id"]
+	// Check if the day entry exists
+	var exists bool
+	err := h.DB.Conn.QueryRow("SELECT EXISTS(SELECT 1 FROM day_entries WHERE id = ?)", dayEntryId).Scan(&exists)
+	if err != nil {
+		http.Error(w, "Failed to check if day entry exists", http.StatusInternalServerError)
+		return
+	}
+	if !exists {
+		http.Error(w, "Day entry not found", http.StatusNotFound)
+		return
+	}
+	// Check if the day entry has responses
+	var hasResponses bool
+	err = h.DB.Conn.QueryRow("SELECT EXISTS(SELECT 1 FROM question_responses WHERE day_entry_id = ?)", dayEntryId).Scan(&hasResponses)
+	if err != nil {
+		http.Error(w, "Failed to check if day entry has responses", http.StatusInternalServerError)
+		return
+	}
+	// Delete the day entry (responses will be deleted via ON DELETE CASCADE)
+	deleteSQL := `DELETE FROM day_entries WHERE id = ?`
+	result, err := h.DB.Conn.Exec(deleteSQL, dayEntryId)
+	if err != nil {
+		http.Error(w, "Failed to delete day entry", http.StatusInternalServerError)
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil || rowsAffected == 0 {
+		http.Error(w, "Day entry not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
