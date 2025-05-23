@@ -43,12 +43,12 @@ const App: React.FC = () => (
   <NavigationContainer>
     <Stack.Navigator>
       <Stack.Screen
-        name='Previous'
+        name='Home'
         component={TabNavigator}
         options={{ headerShown: false }}
       />
       <Stack.Screen name='FillYourDay' component={FillYourDay} />
-      <Stack.Screen name="DayEntries" component={DayEntries} />
+      <Stack.Screen name='DayEntries' component={DayEntries} />
     </Stack.Navigator>
   </NavigationContainer>
 );

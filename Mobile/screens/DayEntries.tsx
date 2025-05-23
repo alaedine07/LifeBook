@@ -8,7 +8,7 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppNavigationParams } from '../types';
 import { ChevronRight } from 'lucide-react-native';
@@ -24,9 +24,11 @@ const DayEntries: React.FC = () => {
   const [days, setDays] = useState<DayEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDays();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchDays();
+    }, [])
+  );
 
   const fetchDays = async () => {
     try {

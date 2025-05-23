@@ -106,7 +106,7 @@ const FillYourDay: React.FC = () => {
       Alert.alert('Success', 'Your answers have been saved!');
       // Add a delay before navigating
       setTimeout(() => {
-        navigation.navigate('DayEntries');
+        navigation.navigate('Home');
       }, 1000);
     } catch (error) {
       Alert.alert('Error', 'Failed to save your answers. Please try again.');
