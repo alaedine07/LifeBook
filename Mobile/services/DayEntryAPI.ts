@@ -48,4 +48,18 @@ export const DayEntryService = {
       throw error;
     }
   },
+
+  async deleteDayEntry(id: string): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/day-entries/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete day entry');
+      }
+    } catch (error) {
+      console.error('Error deleting day entry:', error);
+      throw error;
+    }
+  },
 };
