@@ -17,7 +17,7 @@ import {
   Edit2,
   Trash2,
 } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Question } from '../interfaces/question';
 import { QuestionService } from '../services/QuestionAPI';
 
@@ -30,9 +30,11 @@ const AddQuestion: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
 
-  useEffect(() => {
-    fetchQuestions();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchQuestions();
+    }, [])
+  );
 
   const fetchQuestions = async () => {
     try {
@@ -75,18 +77,13 @@ const AddQuestion: React.FC = () => {
     if (editingQuestion && newQuestion.trim()) {
       try {
         setIsLoading(true);
-        const updatedQuestion = await QuestionService.updateQuestion(
+        await QuestionService.updateQuestion(
           editingQuestion.id,
           newQuestion.trim()
         );
-        setQuestions(
-          questions.map((q) =>
-            q.id === updatedQuestion.id ? updatedQuestion : q
-          )
-        );
-        setNewQuestion('');
-        setIsAddingNew(false);
+        await fetchQuestions(); // Refresh the list after update
         setEditingQuestion(null);
+        setNewQuestion('');
       } catch (error) {
         Alert.alert('Error', 'Failed to update question');
       } finally {
@@ -231,13 +228,52 @@ const AddQuestion: React.FC = () => {
           </View>
         </View>
       ) : (
-        <FlatList
-          data={questions}
-          renderItem={renderQuestion}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-        />
+        <>
+          {!isAddingNew && questions.length > 0 && (
+            <View style={{ alignItems: 'center', marginVertical: 16 }}>
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={() => {
+                  setIsAddingNew(true);
+                  setEditingQuestion(null);
+                  setNewQuestion('');
+                }}
+              >
+                <Text style={styles.saveButtonText}>Add a new question</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          <FlatList
+            data={questions}
+            renderItem={renderQuestion}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContainer}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListEmptyComponent={
+              !isLoading
+                ? () => (
+                    <View style={{ alignItems: 'center', marginTop: 40 }}>
+                      <Text style={{ color: '#666', marginBottom: 16 }}>
+                        No questions yet.
+                      </Text>
+                      <TouchableOpacity
+                        style={[styles.button, styles.saveButton]}
+                        onPress={() => {
+                          setIsAddingNew(true);
+                          setEditingQuestion(null);
+                          setNewQuestion('');
+                        }}
+                      >
+                        <Text style={styles.saveButtonText}>
+                          Add your first question
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )
+                : null
+            }
+          />
+        </>
       )}
     </SafeAreaView>
   );
