@@ -31,6 +31,7 @@ const FillYourDay: React.FC = () => {
   const [answers, setAnswers] = useState<Array<[string, string]>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState<number>(0);
+  const readOnly = (route as any).params?.readOnly || false;
 
   useEffect(() => {
     fetchQuestions();
@@ -80,6 +81,7 @@ const FillYourDay: React.FC = () => {
           question={question}
           initialAnswer={existingAnswer}
           onAddNewAnswer={handleNewAnswerSubmit}
+          isReadOnly={readOnly}
         />
       </View>
     );
@@ -168,9 +170,11 @@ const FillYourDay: React.FC = () => {
           <Text style={styles.headerTitle}>Fill Your Day</Text>
           <Text style={styles.dateText}>{getFormattedDate()}</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={() => SaveDay()}>
-          <PlusCircle color='#87CEFA' size={24} />
-        </TouchableOpacity>
+        {!readOnly && (
+          <TouchableOpacity style={styles.addButton} onPress={() => SaveDay()}>
+            <PlusCircle color='#87CEFA' size={24} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {questions.length === 0 ? (

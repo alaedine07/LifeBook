@@ -28,6 +28,7 @@ interface QuestionAnswerProps {
   question: Question;
   initialAnswer?: string;
   onAddNewAnswer: (questionId: string, answer: string) => void;
+  isReadOnly?: boolean;
 }
 
 const MAX_COLLAPSED_LENGTH = 400;
@@ -37,6 +38,7 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
   question,
   initialAnswer,
   onAddNewAnswer,
+  isReadOnly = false,
 }) => {
   const [answer, setAnswer] = useState(initialAnswer || '');
   const [submittedAnswers, setSubmittedAnswers] = useState<Answer[]>(
@@ -113,6 +115,7 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
   };
 
   const handleLongPress = (answerId: string) => {
+    if (isReadOnly) return;
     if (selectedAnswerId === answerId) {
       setSelectedAnswerId(null);
       Animated.timing(actionButtonsOpacity, {
@@ -131,6 +134,7 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
   };
 
   const handleEdit = (answer: Answer) => {
+    if (isReadOnly) return;
     setEditingAnswer(answer);
     setEditText(answer.text);
     setEditModalVisible(true);
@@ -139,6 +143,7 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
   };
 
   const handleDelete = (answerId: string) => {
+    if (isReadOnly) return;
     setSubmittedAnswers((answers) => answers.filter((a) => a.id !== answerId));
     setSelectedAnswerId(null);
     actionButtonsOpacity.setValue(0);
@@ -183,9 +188,10 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
         style={styles.bubbleWrapper}
         onLongPress={() => handleLongPress(item.id)}
         activeOpacity={0.7}
+        disabled={isReadOnly}
       >
         <View style={styles.bubbleContainer}>
-          {isSelected && (
+          {isSelected && !isReadOnly && (
             <Animated.View
               style={[styles.actionButtons, { opacity: actionButtonsOpacity }]}
             >
@@ -243,17 +249,20 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
               onChangeText={setAnswer}
               placeholder='Write your answer...'
               placeholderTextColor='#666'
+              editable={!isReadOnly}
             />
-            <TouchableOpacity
-              style={[
-                styles.submitButton,
-                !answer.trim() && styles.submitButtonDisabled,
-              ]}
-              onPress={handleSubmit}
-              disabled={!answer.trim()}
-            >
-              <Send color={answer.trim() ? '#87CEFA' : '#ccc'} size={20} />
-            </TouchableOpacity>
+            {!isReadOnly && (
+              <TouchableOpacity
+                style={[
+                  styles.submitButton,
+                  !answer.trim() && styles.submitButtonDisabled,
+                ]}
+                onPress={handleSubmit}
+                disabled={!answer.trim()}
+              >
+                <Send color={answer.trim() ? '#87CEFA' : '#ccc'} size={20} />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 

@@ -80,7 +80,9 @@ const DayEntries: React.FC = () => {
       <View style={styles.entryCard}>
         <TouchableOpacity
           style={styles.entryHeader}
-          onPress={() => navigation.navigate('FillYourDay', { item })}
+          onPress={() =>
+            navigation.navigate('FillYourDay', { item, readOnly: true })
+          }
         >
           <Text style={styles.entryDate}>{formatDate(item.date)}</Text>
         </TouchableOpacity>
