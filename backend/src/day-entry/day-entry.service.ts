@@ -9,22 +9,25 @@ export class DayEntryService {
   constructor(
     @InjectRepository(DayEntry)
     private dayEntryRepository: Repository<DayEntry>,
-    private reflectionService: ReflectionService,
   ) {}
 
-  async createEntry(date: Date): Promise<DayEntry> {
-    const currentReflections = await this.reflectionService.findAll();
-
+  async createEntry(data: DayEntry): Promise<DayEntry> {
+    console.log('Creating day entry with data:', data);
     const entry = this.dayEntryRepository.create({
-      entryDate: date,
-      responses: currentReflections.map((reflection) => ({
-        reflection_text: reflection.content,
-        answers: [],
-      })),
+      entryDate: data.entryDate,
+      responses: data.responses,
       createdAt: new Date(),
     });
 
     return this.dayEntryRepository.save(entry);
+  }
+
+  async getAllEntries(): Promise<DayEntry[]> {
+    return this.dayEntryRepository.find({
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 
   async addAnswer(

@@ -11,15 +11,25 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { DayEntryService } from './day-entry.service';
+import { DayEntry } from './entities/day-entry.entity';
 
 @Controller('day-entries')
 export class DayEntryController {
   constructor(private readonly dayEntryService: DayEntryService) {}
 
-  @Post()
-  async createEntry(@Body() { date }: { date: string }) {
+  @Get('all')
+  async getAllEntries() {
     try {
-      return await this.dayEntryService.createEntry(new Date(date));
+      return await this.dayEntryService.getAllEntries();
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post()
+  async createEntry(@Body() data: DayEntry) {
+    try {
+      return await this.dayEntryService.createEntry(data);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
