@@ -1,24 +1,17 @@
-import { DayEntry } from '../interfaces/day_entry.types';
+import { DayEntry } from '../interfaces/day_entry';
 
-const API_BASE_URL = 'http://172.20.10.5:8080';
+const API_BASE_URL = 'http://10.0.2.2:3000';
 
 export const DayEntryService = {
-  async saveDayEntry(responses: Array<[string, string]>): Promise<any> {
+  async saveDayEntry(dayEntry: DayEntry): Promise<any> {
+    console.log('Saving day entry:', dayEntry);
     try {
-      const formattedResponses = responses.map(([question_id, answer]) => ({
-        question_id,
-        answer,
-      }));
-      console.log('Formatted responses:', formattedResponses);
       const response = await fetch(`${API_BASE_URL}/day-entries`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          date: new Date().toISOString(),
-          responses: formattedResponses,
-        }),
+        body: JSON.stringify(dayEntry),
       });
 
       if (!response.ok) {
@@ -34,17 +27,16 @@ export const DayEntryService = {
 
   async fetchDays(): Promise<DayEntry[]> {
     try {
-      console.log('fetching all days ...');
-      const response = await fetch(`${API_BASE_URL}/day-entries`);
+      const response = await fetch(`${API_BASE_URL}/day-entries/all`);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch questions');
+        throw new Error('Failed to fetch reflections');
       }
 
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching questions:', error);
+      console.error('Error fetching reflections:', error);
       throw error;
     }
   },

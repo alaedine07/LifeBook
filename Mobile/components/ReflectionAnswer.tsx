@@ -16,7 +16,8 @@ import {
   KeyboardEvent,
 } from 'react-native';
 import { Send, ChevronDown, ChevronUp, Edit2, X } from 'lucide-react-native';
-import { Question } from '../interfaces/question';
+import { Reflection } from '../interfaces/Reflection';
+import { DayEntry } from '../interfaces/day_entry';
 
 interface Answer {
   id: string;
@@ -24,55 +25,29 @@ interface Answer {
   isExpanded: boolean;
 }
 
-interface QuestionAnswerProps {
-  question: Question;
-  initialAnswer?: string;
-  onAddNewAnswer: (questionId: string, answer: string) => void;
+interface ReflectionAnswerProps {
+  reflection: Reflection;
+  dayEntry: DayEntry;
+  setDayEntry: React.Dispatch<React.SetStateAction<DayEntry>>;
   isReadOnly?: boolean;
 }
 
 const MAX_COLLAPSED_LENGTH = 400;
 const windowWidth = Dimensions.get('window').width;
 
-const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
-  question,
-  initialAnswer,
-  onAddNewAnswer,
+const ReflectionAnswer: React.FC<ReflectionAnswerProps> = ({
+  reflection,
+  dayEntry,
+  setDayEntry,
   isReadOnly = false,
 }) => {
-  const [answer, setAnswer] = useState(initialAnswer || '');
-  const [submittedAnswers, setSubmittedAnswers] = useState<Answer[]>(
-    initialAnswer
-      ? [
-          {
-            id: Date.now().toString(),
-            text: initialAnswer,
-            isExpanded: false,
-          },
-        ]
-      : []
-  );
+  const [answer, setAnswer] = useState('');
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingAnswer, setEditingAnswer] = useState<Answer | null>(null);
   const [editText, setEditText] = useState('');
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [actionButtonsOpacity] = useState(new Animated.Value(0));
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-  useEffect(() => {
-    setAnswer(initialAnswer || '');
-    if (initialAnswer) {
-      setSubmittedAnswers([
-        {
-          id: Date.now().toString(),
-          text: initialAnswer,
-          isExpanded: false,
-        },
-      ]);
-    } else {
-      setSubmittedAnswers([]);
-    }
-  }, [initialAnswer]);
 
   useEffect(() => {
     const keyboardWillShow = (event: KeyboardEvent) => {
@@ -98,20 +73,40 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
     };
   }, []);
 
+  const onAddNewAnswer = (reflectionText: string, newAnswer: string) => {
+    setDayEntry((prev) => {
+      // check if the reflection already exists in the responses
+      const existingResponse = prev.responses.find(
+        (response) => response.reflection_text === reflectionText
+      );
+      // if it exists, add the new answer to that response
+      if (existingResponse) {
+        existingResponse.answers.push(newAnswer);
+        return {
+          ...prev,
+          responses: prev.responses.map((response) =>
+            response.reflection_text === reflectionText
+              ? existingResponse
+              : response
+          ),
+        };
+      }
+      // if it doesn't exist, create a new response object
+      const answerObj = {
+        reflection_text: reflectionText,
+        answers: [newAnswer],
+      };
+      return {
+        ...prev,
+        responses: [...prev.responses, answerObj],
+      };
+    });
+  };
+
   const handleSubmit = () => {
-    if (answer.trim() !== '') {
-      setSubmittedAnswers([
-        {
-          id: Date.now().toString(),
-          text: answer.trim(),
-          isExpanded: false,
-        },
-        ...submittedAnswers,
-      ]);
-      onAddNewAnswer(question.id, answer);
-      setAnswer('');
-      Keyboard.dismiss();
-    }
+    onAddNewAnswer(reflection.content, answer);
+    setAnswer('');
+    Keyboard.dismiss();
   };
 
   const handleLongPress = (answerId: string) => {
@@ -144,20 +139,20 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
 
   const handleDelete = (answerId: string) => {
     if (isReadOnly) return;
-    setSubmittedAnswers((answers) => answers.filter((a) => a.id !== answerId));
+    // setSubmittedAnswers((answers) => answers.filter((a) => a.id !== answerId));
     setSelectedAnswerId(null);
     actionButtonsOpacity.setValue(0);
   };
 
   const handleEditSubmit = () => {
     if (editText.trim() && editingAnswer) {
-      setSubmittedAnswers((answers) =>
-        answers.map((answer) =>
-          answer.id === editingAnswer.id
-            ? { ...answer, text: editText.trim() }
-            : answer
-        )
-      );
+      // setSubmittedAnswers((answers) =>
+      //   answers.map((answer) =>
+      //     answer.id === editingAnswer.id
+      //       ? { ...answer, text: editText.trim() }
+      //       : answer
+      //   )
+      // );
       setEditModalVisible(false);
       setEditingAnswer(null);
       setEditText('');
@@ -165,13 +160,13 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
   };
 
   const toggleExpand = (id: string) => {
-    setSubmittedAnswers((answers) =>
-      answers.map((answer) =>
-        answer.id === id
-          ? { ...answer, isExpanded: !answer.isExpanded }
-          : answer
-      )
-    );
+    // setSubmittedAnswers((answers) =>
+    //   answers.map((answer) =>
+    //     answer.id === id
+    //       ? { ...answer, isExpanded: !answer.isExpanded }
+    //       : answer
+    //   )
+    // );
   };
 
   const renderAnswer = ({ item }: { item: Answer }) => {
@@ -239,7 +234,7 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
     >
       <View style={styles.container}>
         <View style={styles.topSection}>
-          <Text style={styles.question}>{question.question}</Text>
+          <Text style={styles.reflection}>{reflection.content}</Text>
 
           <View style={styles.inputContainer}>
             <TextInput
@@ -266,22 +261,33 @@ const QuestionAnswer: React.FC<QuestionAnswerProps> = ({
           </View>
         </View>
 
-        {submittedAnswers.length > 0 ? (
-          <FlatList
-            style={styles.answersList}
-            data={submittedAnswers}
-            renderItem={renderAnswer}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.answersListContent}
-          />
-        ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>
-              Your answers will appear here
-            </Text>
-          </View>
-        )}
+        {(() => {
+          const response = dayEntry.responses.find(
+            (r) => r.reflection_text === reflection.content
+          );
+          const answers = response ? response.answers : [];
+          const answerObjects = answers.map((a, idx) => ({
+            id: idx.toString(),
+            text: a,
+            isExpanded: false,
+          }));
+          return answerObjects.length > 0 ? (
+            <FlatList
+              style={styles.answersList}
+              data={answerObjects}
+              renderItem={renderAnswer}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.answersListContent}
+            />
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>
+                Your answers will appear here
+              </Text>
+            </View>
+          );
+        })()}
 
         <Modal
           visible={editModalVisible}
@@ -346,7 +352,7 @@ const styles = StyleSheet.create({
   topSection: {
     marginBottom: 20,
   },
-  question: {
+  reflection: {
     fontSize: 24,
     fontWeight: '600',
     color: '#000',
@@ -505,4 +511,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default QuestionAnswer;
+export default ReflectionAnswer;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -18,84 +18,89 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { Question } from '../interfaces/question';
-import { QuestionService } from '../services/QuestionAPI';
+import { Reflection } from '../interfaces/Reflection';
+import { ReflectionService } from '../services/ReflectionsAPI';
 
-const AddQuestion: React.FC = () => {
-  const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newQuestion, setNewQuestion] = useState('');
-  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
-  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+const ReflectionScreen: React.FC = () => {
+  const [isAddingNewReflection, setIsAddingNew] = useState(false);
+  const [newReflection, setNewReflection] = useState('');
+  const [selectedReflection, setSelectedReflection] = useState<string | null>(
+    null
+  );
+  const [editingReflection, setEditingReflection] = useState<Reflection | null>(
+    null
+  );
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [reflections, setReflections] = useState<Reflection[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchQuestions();
+      fetchReflections();
     }, [])
   );
 
-  const fetchQuestions = async () => {
+  const fetchReflections = async () => {
     try {
       setIsLoading(true);
-      const fetchedQuestions = await QuestionService.fetchQuestions();
-      setQuestions(fetchedQuestions);
+      const fetchedReflections = await ReflectionService.fetchReflections();
+      setReflections(fetchedReflections);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load questions');
+      Alert.alert('Error', 'Failed to load reflections');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleAddNew = async () => {
-    if (newQuestion.trim()) {
+    if (newReflection.trim()) {
       try {
         setIsLoading(true);
-        const addedQuestion = await QuestionService.addQuestion(
-          newQuestion.trim()
+        const addedReflection = await ReflectionService.addReflection(
+          newReflection.trim()
         );
-        setQuestions([addedQuestion, ...questions]);
-        setNewQuestion('');
+        setReflections([addedReflection, ...reflections]);
+        setNewReflection('');
         setIsAddingNew(false);
       } catch (error) {
-        Alert.alert('Error', 'Failed to add question');
+        Alert.alert('Error', 'Failed to add Reflection');
       } finally {
         setIsLoading(false);
       }
     }
   };
 
-  const handleEdit = (question: Question) => {
-    setEditingQuestion(question);
-    setNewQuestion(question.question);
+  const handleEdit = (reflection: Reflection) => {
+    setEditingReflection(reflection);
+    setNewReflection(reflection.content);
     setIsAddingNew(true);
-    setSelectedQuestion(null);
+    setSelectedReflection(null);
   };
 
   const handleUpdate = async () => {
-    if (editingQuestion && newQuestion.trim()) {
+    if (editingReflection && newReflection.trim()) {
       try {
         setIsLoading(true);
-        await QuestionService.updateQuestion(
-          editingQuestion.id,
-          newQuestion.trim()
+        await ReflectionService.updateReflection(
+          editingReflection.id,
+          newReflection.trim()
         );
-        await fetchQuestions(); // Refresh the list after update
-        setEditingQuestion(null);
-        setNewQuestion('');
+        await fetchReflections(); // Refresh the list after update
+        setEditingReflection(null);
+        setNewReflection('');
+        setIsAddingNew(false);
       } catch (error) {
-        Alert.alert('Error', 'Failed to update question');
+        Alert.alert('Error', 'Failed to update reflection');
       } finally {
         setIsLoading(false);
       }
     }
   };
 
-  const handleDelete = (questionId: string) => {
+  const handleDelete = (reflectionId: string) => {
     Alert.alert(
-      'Delete Question',
-      'Are you sure you want to delete this question?',
+      'Delete Reflection',
+      'Are you sure you want to delete this Reflection?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -104,11 +109,11 @@ const AddQuestion: React.FC = () => {
           onPress: async () => {
             try {
               setIsLoading(true);
-              await QuestionService.deleteQuestion(questionId);
-              setQuestions(questions.filter((q) => q.id !== questionId));
-              setSelectedQuestion(null);
+              await ReflectionService.deleteReflection(reflectionId);
+              setReflections(reflections.filter((r) => r.id !== reflectionId));
+              setSelectedReflection(null);
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete question');
+              Alert.alert('Error', 'Failed to delete reflection');
             } finally {
               setIsLoading(false);
             }
@@ -118,15 +123,15 @@ const AddQuestion: React.FC = () => {
     );
   };
 
-  const renderQuestion = ({ item }: { item: Question }) => {
-    const isSelected = selectedQuestion === item.id;
+  const renderReflection = ({ item }: { item: Reflection }) => {
+    const isSelected = selectedReflection === item.id;
 
     return (
-      <View style={styles.questionCard}>
-        <View style={styles.questionHeader}>
-          <Text style={styles.questionText}>{item.question}</Text>
+      <View style={styles.reflectionCard}>
+        <View style={styles.reflectionHeader}>
+          <Text style={styles.reflectionText}>{item.content}</Text>
           <TouchableOpacity
-            onPress={() => setSelectedQuestion(isSelected ? null : item.id)}
+            onPress={() => setSelectedReflection(isSelected ? null : item.id)}
           >
             <MoreVertical color='#666' size={20} />
           </TouchableOpacity>
@@ -167,13 +172,13 @@ const AddQuestion: React.FC = () => {
         >
           <ArrowLeft color='#000' size={24} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Questions</Text>
+        <Text style={styles.headerTitle}>Reflections</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
             setIsAddingNew(true);
-            setEditingQuestion(null);
-            setNewQuestion('');
+            setEditingReflection(null);
+            setNewReflection('');
           }}
         >
           <Plus color='#87CEFA' size={24} />
@@ -186,17 +191,17 @@ const AddQuestion: React.FC = () => {
         </View>
       )}
 
-      {isAddingNew ? (
+      {isAddingNewReflection ? (
         <View style={styles.addContainer}>
           <Text style={styles.label}>
-            {editingQuestion ? 'Edit Question' : 'New Question'}
+            {editingReflection ? 'Edit Reflection' : 'New Reflection'}
           </Text>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              value={newQuestion}
-              onChangeText={setNewQuestion}
-              placeholder='Type your question here...'
+              value={newReflection}
+              onChangeText={setNewReflection}
+              placeholder='Type your reflection here...'
               multiline
               autoFocus
             />
@@ -206,8 +211,8 @@ const AddQuestion: React.FC = () => {
               style={[styles.button, styles.cancelButton]}
               onPress={() => {
                 setIsAddingNew(false);
-                setNewQuestion('');
-                setEditingQuestion(null);
+                setNewReflection('');
+                setEditingReflection(null);
               }}
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -216,36 +221,36 @@ const AddQuestion: React.FC = () => {
               style={[
                 styles.button,
                 styles.saveButton,
-                !newQuestion.trim() && styles.saveButtonDisabled,
+                !newReflection.trim() && styles.saveButtonDisabled,
               ]}
-              onPress={editingQuestion ? handleUpdate : handleAddNew}
-              disabled={!newQuestion.trim() || isLoading}
+              onPress={editingReflection ? handleUpdate : handleAddNew}
+              disabled={!newReflection.trim() || isLoading}
             >
               <Text style={styles.saveButtonText}>
-                {editingQuestion ? 'Update' : 'Save'}
+                {editingReflection ? 'Update' : 'Save'}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
       ) : (
         <>
-          {!isAddingNew && questions.length > 0 && (
+          {!isAddingNewReflection && reflections.length > 0 && (
             <View style={{ alignItems: 'center', marginVertical: 16 }}>
               <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
                 onPress={() => {
                   setIsAddingNew(true);
-                  setEditingQuestion(null);
-                  setNewQuestion('');
+                  setEditingReflection(null);
+                  setNewReflection('');
                 }}
               >
-                <Text style={styles.saveButtonText}>Add a new question</Text>
+                <Text style={styles.saveButtonText}>Add a new reflection</Text>
               </TouchableOpacity>
             </View>
           )}
           <FlatList
-            data={questions}
-            renderItem={renderQuestion}
+            data={reflections}
+            renderItem={renderReflection}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContainer}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -254,18 +259,18 @@ const AddQuestion: React.FC = () => {
                 ? () => (
                     <View style={{ alignItems: 'center', marginTop: 40 }}>
                       <Text style={{ color: '#666', marginBottom: 16 }}>
-                        No questions yet.
+                        No reflections yet.
                       </Text>
                       <TouchableOpacity
                         style={[styles.button, styles.saveButton]}
                         onPress={() => {
                           setIsAddingNew(true);
-                          setEditingQuestion(null);
-                          setNewQuestion('');
+                          setEditingReflection(null);
+                          setNewReflection('');
                         }}
                       >
                         <Text style={styles.saveButtonText}>
-                          Add your first question
+                          Add your first reflection
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -320,7 +325,7 @@ const styles = StyleSheet.create({
   listContainer: {
     padding: 16,
   },
-  questionCard: {
+  reflectionCard: {
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
@@ -333,12 +338,12 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  questionHeader: {
+  reflectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  questionText: {
+  reflectionText: {
     flex: 1,
     fontSize: 16,
     color: '#333',
@@ -433,4 +438,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddQuestion;
+export default ReflectionScreen;

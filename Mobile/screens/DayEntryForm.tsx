@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Ref } from 'react';
 import {
   SafeAreaView,
   ActivityIndicator,
@@ -10,15 +10,16 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import QuestionAnswer from '../components/QuestionAnswer';
+import ReflectionAnswer from '../components/ReflectionAnswer';
 import PageIndicator from '../components/PageIndicator';
-import { QuestionService } from '../services/QuestionAPI';
+import { ReflectionService } from '../services/ReflectionsAPI';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { PlusCircle } from 'lucide-react-native';
 import { AppNavigationParams } from '../types';
 import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
-import { Question } from '../interfaces/question';
+import { Reflection } from '../interfaces/Reflection';
 import { DayEntryService } from '../services/DayEntryAPI';
+import { DayEntry } from '../interfaces/day_entry';
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -26,34 +27,27 @@ const FillYourDay: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<AppNavigationParams>>();
   const route = useRoute();
-  const dayEntry = (route as any).params?.item;
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [answers, setAnswers] = useState<Array<[string, string]>>([]);
+  const dayEntryParam = (route as any).params?.item;
+  const [reflections, setReflections] = useState<Reflection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const readOnly = (route as any).params?.readOnly || false;
+  const [dayEntry, setDayEntry] = useState<DayEntry>({
+    entryDate: new Date().toISOString(),
+    description: '',
+    responses: [],
+  });
 
   useEffect(() => {
-    fetchQuestions();
+    fetchReflections();
   }, []);
 
-  useEffect(() => {
-    if (dayEntry?.responses) {
-      setAnswers(
-        dayEntry.responses.map((r: { question_id: string; answer: string }) => [
-          r.question_id,
-          r.answer,
-        ])
-      );
-    }
-  }, [dayEntry]);
-
-  const fetchQuestions = async () => {
+  const fetchReflections = async () => {
     try {
       setIsLoading(true);
-      setQuestions(await QuestionService.fetchQuestions());
+      setReflections(await ReflectionService.fetchReflections());
     } catch (error) {
-      Alert.alert('Error', 'Failed to load questions');
+      Alert.alert('Error', 'Failed to load reflections');
     } finally {
       setIsLoading(false);
     }
@@ -66,21 +60,17 @@ const FillYourDay: React.FC = () => {
   };
 
   const renderItem = ({
-    item: question,
+    item: reflection,
   }: {
-    item: Question;
+    item: Reflection;
     index: number;
   }) => {
-    const existingAnswer = dayEntry?.responses?.find(
-      (r: { question_id: string }) => r.question_id === question.id
-    )?.answer;
-
     return (
       <View style={[styles.pageContainer, { width: windowWidth }]}>
-        <QuestionAnswer
-          question={question}
-          initialAnswer={existingAnswer}
-          onAddNewAnswer={handleNewAnswerSubmit}
+        <ReflectionAnswer
+          reflection={reflection}
+          dayEntry={dayEntry}
+          setDayEntry={setDayEntry}
           isReadOnly={readOnly}
         />
       </View>
@@ -98,13 +88,9 @@ const FillYourDay: React.FC = () => {
     return now.toLocaleDateString('en-US', options);
   };
 
-  const handleNewAnswerSubmit = (questionId: string, answer: string) => {
-    setAnswers((prevAnswers) => [...prevAnswers, [questionId, answer]]);
-  };
-
-  async function SaveDay(): Promise<void> {
+  async function SaveDay(dayEntry: DayEntry): Promise<void> {
     try {
-      await DayEntryService.saveDayEntry(answers);
+      await DayEntryService.saveDayEntry(dayEntry);
       Alert.alert('Success', 'Your answers have been saved!');
       // Add a delay before navigating
       setTimeout(() => {
@@ -126,14 +112,14 @@ const FillYourDay: React.FC = () => {
         </View>
         <View style={styles.emptyContainer}>
           <ActivityIndicator size='large' color='#87CEFA' />
-          <Text style={styles.emptyText}>Loading questions...</Text>
+          <Text style={styles.emptyText}>Loading reflections...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  // Render empty state if no questions
-  if (questions.length === 0) {
+  // Render empty state if no reflections
+  if (reflections.length === 0) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
@@ -143,20 +129,20 @@ const FillYourDay: React.FC = () => {
           </View>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => navigation.navigate('AddQuestion')}
+            onPress={() => navigation.navigate('AddReflection')}
           >
             <PlusCircle color='#87CEFA' size={24} />
           </TouchableOpacity>
         </View>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>
-            No questions available. Add some!
+            No reflections available. Add some!
           </Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate('AddQuestion')}
-            style={styles.addQuestionsButton}
+            onPress={() => navigation.navigate('AddReflection')}
+            style={styles.addReflectionsButton}
           >
-            <Text style={styles.addQuestionsButtonText}>Add Questions</Text>
+            <Text style={styles.addReflectionsButtonText}>Add Reflections</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -171,21 +157,24 @@ const FillYourDay: React.FC = () => {
           <Text style={styles.dateText}>{getFormattedDate()}</Text>
         </View>
         {!readOnly && (
-          <TouchableOpacity style={styles.addButton} onPress={() => SaveDay()}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => SaveDay(dayEntry)}
+          >
             <PlusCircle color='#87CEFA' size={24} />
           </TouchableOpacity>
         )}
       </View>
 
-      {questions.length === 0 ? (
+      {reflections.length === 0 ? (
         <View style={styles.emptyContainer}>
           <ActivityIndicator size='large' color='#87CEFA' />
-          <Text style={styles.emptyText}>Loading questions...</Text>
+          <Text style={styles.emptyText}>Loading reflections...</Text>
         </View>
       ) : (
         <>
           <FlatList
-            data={questions}
+            data={reflections}
             keyExtractor={(index) => index.id.toString()}
             renderItem={renderItem}
             horizontal
@@ -194,7 +183,10 @@ const FillYourDay: React.FC = () => {
             onMomentumScrollEnd={handleScroll}
             style={styles.flatList}
           />
-          <PageIndicator count={questions.length} currentIndex={currentPage} />
+          <PageIndicator
+            count={reflections.length}
+            currentIndex={currentPage}
+          />
         </>
       )}
     </SafeAreaView>
@@ -245,14 +237,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
-  addQuestionsButton: {
+  addReflectionsButton: {
     marginTop: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
     backgroundColor: '#87CEFA',
     borderRadius: 8,
   },
-  addQuestionsButtonText: {
+  addReflectionsButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '500',

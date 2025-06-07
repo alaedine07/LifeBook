@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Home, PlusCircle } from 'lucide-react-native';
-import AddQuestion from './screens/AddQuestion';
+import ReflectionScreen from './screens/Reflections';
 import DayEntries from './screens/DayEntries';
 import FillYourDay from './screens/DayEntryForm';
 
@@ -27,8 +27,8 @@ const TabNavigator: React.FC = () => (
       }}
     />
     <Tab.Screen
-      name='AddQuestion'
-      component={AddQuestion}
+      name='AddReflection'
+      component={ReflectionScreen}
       options={{
         tabBarLabel: 'Reflections',
         tabBarIcon: ({ color, size }) => (

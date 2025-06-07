@@ -11,10 +11,10 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppNavigationParams } from '../types';
-import { ChevronRight, Edit2, MoreVertical, Trash2 } from 'lucide-react-native';
+import { Edit2, MoreVertical, Trash2 } from 'lucide-react-native';
 
-import { mockQuestions } from '../mocks/questions.mocks';
-import { DayEntry } from '../interfaces/day_entry.types';
+import { mockReflections } from '../mocks/reflections.mocks';
+import { DayEntry } from '../interfaces/day_entry';
 import { DayEntryService } from '../services/DayEntryAPI';
 import { formatDate } from '../utils/dateUtils';
 
@@ -66,12 +66,11 @@ const DayEntries: React.FC = () => {
   };
 
   const renderDayEntry = ({ item }: { item: DayEntry }) => {
-    const uniqueQuestionsAnswered = item.responses
-      ? new Set(
-          item.responses.map(
-            (response: { question_id: string }) => response.question_id
-          )
-        ).size
+    const uniqueReflectionsAnswered = item.responses
+      ? item.responses.filter(
+          (response: { answers: string[] }) =>
+            response.answers && response.answers.length > 0
+        ).length
       : 0;
 
     const isSelected = selectedEntryId === item.id;
@@ -84,14 +83,17 @@ const DayEntries: React.FC = () => {
             navigation.navigate('FillYourDay', { item, readOnly: true })
           }
         >
-          <Text style={styles.entryDate}>{formatDate(item.date)}</Text>
+          <Text style={styles.entryDate}>{formatDate(item.entryDate)}</Text>
         </TouchableOpacity>
         <Text>
-          {uniqueQuestionsAnswered} / {mockQuestions.length} Questions Answered
+          {uniqueReflectionsAnswered} / {mockReflections.length} Reflections
+          Answered
         </Text>
         <TouchableOpacity
           style={styles.moreButton}
-          onPress={() => setSelectedEntryId(isSelected ? null : item.id)}
+          onPress={() =>
+            setSelectedEntryId(isSelected ? null : item.id ?? null)
+          }
         >
           <MoreVertical color='#666' size={20} />
         </TouchableOpacity>
@@ -111,7 +113,7 @@ const DayEntries: React.FC = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionButton, styles.deleteButton]}
-              onPress={() => handleDelete(item.id)}
+              onPress={() => handleDelete(item.id ?? '')}
             >
               <Trash2 size={16} color='#FF6B6B' />
               <Text style={[styles.actionButtonText, styles.deleteButtonText]}>
@@ -142,7 +144,7 @@ const DayEntries: React.FC = () => {
       <FlatList
         data={days}
         renderItem={renderDayEntry}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id ?? ''}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />

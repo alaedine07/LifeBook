@@ -2,34 +2,22 @@ export const daysEntryMock = [
   {
     id: '17271',
     date: '2024-12-10T22:51:17Z',
+    description: 'Daily reflection entry',
     responses: [
       {
-        question_id: '36182',
-        answer: 'Went to work',
+        reflection_text: 'What did you do today?',
+        answers: ['Went to work', 'Gave food to the dog', 'Went to training'],
       },
       {
-        question_id: '36182',
-        answer: 'Gave food to the dog',
+        reflection_text: 'What are you looking forward to?',
+        answers: [
+          'A meeting with top management',
+          'Going to training after work',
+        ],
       },
       {
-        question_id: '36182',
-        answer: 'Went to training',
-      },
-      {
-        question_id: '36182',
-        answer: 'Nothing',
-      },
-      {
-        question_id: '36183',
-        answer: 'A meeting with top managment',
-      },
-      {
-        question_id: '36183',
-        answer: 'Going to training after work',
-      },
-      {
-        question_id: '36184',
-        answer: 'Having enough money to put food on my table',
+        reflection_text: 'What are you grateful for?',
+        answers: ['Having enough money to put food on my table'],
       },
     ],
   },

@@ -1,6 +1,6 @@
-export interface Question {
+export interface Reflection {
   id: string;
-  question: string;
+  content: string;
   createdAt?: string;
   updatedAt?: string;
 }
