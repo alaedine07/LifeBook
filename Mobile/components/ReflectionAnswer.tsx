@@ -146,13 +146,20 @@ const ReflectionAnswer: React.FC<ReflectionAnswerProps> = ({
 
   const handleEditSubmit = () => {
     if (editText.trim() && editingAnswer) {
-      // setSubmittedAnswers((answers) =>
-      //   answers.map((answer) =>
-      //     answer.id === editingAnswer.id
-      //       ? { ...answer, text: editText.trim() }
-      //       : answer
-      //   )
-      // );
+      setDayEntry((prev) => {
+        // Find the response for this reflection
+        const responses = prev.responses.map((response) => {
+          if (response.reflection_text === reflection.content) {
+            // Update the answer at the correct index
+            const updatedAnswers = response.answers.map((a, idx) =>
+              idx.toString() === editingAnswer.id ? editText.trim() : a
+            );
+            return { ...response, answers: updatedAnswers };
+          }
+          return response;
+        });
+        return { ...prev, responses };
+      });
       setEditModalVisible(false);
       setEditingAnswer(null);
       setEditText('');
