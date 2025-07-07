@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Ref } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   ActivityIndicator,
@@ -28,19 +28,57 @@ const FillYourDay: React.FC = () => {
     useNavigation<NativeStackNavigationProp<AppNavigationParams>>();
   const route = useRoute();
   const dayEntryParam = (route as any).params?.item;
-  const [reflections, setReflections] = useState<Reflection[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!dayEntryParam);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const readOnly = (route as any).params?.readOnly || false;
-  const [dayEntry, setDayEntry] = useState<DayEntry>({
-    entryDate: new Date().toISOString(),
-    description: '',
-    responses: [],
-  });
+  // Initialize dayEntry with the passed parameter or default values
+  // If dayEntryParam is provided, use it; otherwise, create a new DayEntry object
+  const [dayEntry, setDayEntry] = useState<DayEntry>(
+    dayEntryParam
+      ? { ...dayEntryParam }
+      : {
+          entryDate: new Date().toISOString(),
+          description: '',
+          responses: [],
+        }
+  );
+  // Initialize reflections with the passed parameter otherwise empty array
+  const [reflections, setReflections] = useState<Reflection[]>(
+    dayEntryParam
+      ? dayEntryParam.responses.map((r: any, idx: number) => ({
+          id: idx.toString(),
+          content: r.reflection_text,
+        }))
+      : []
+  );
 
+  // If dayEntryParam is provided, set reflections from it; otherwise, fetch reflections
   useEffect(() => {
-    fetchReflections();
+    if (!dayEntryParam) {
+      fetchReflections();
+    }
   }, []);
+
+  // If reflections are fetched and dayEntry has no responses, initialize responses
+  // with the fetched reflections
+  // This ensures that when the user opens the form, they have a structure to fill out
+  // If dayEntryParam is provided, it will not reinitialize responses
+  // This is useful for editing existing entries where responses are already set
+  useEffect(() => {
+    if (
+      !dayEntryParam &&
+      reflections.length > 0 &&
+      dayEntry.responses.length === 0
+    ) {
+      setDayEntry((prev) => ({
+        ...prev,
+        responses: reflections.map((reflection) => ({
+          reflection_text: reflection.content,
+          answers: [],
+        })),
+      }));
+    }
+  }, [reflections, dayEntryParam]);
 
   const fetchReflections = async () => {
     try {
