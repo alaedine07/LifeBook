@@ -128,7 +128,12 @@ const FillYourDay: React.FC = () => {
 
   async function SaveDay(dayEntry: DayEntry): Promise<void> {
     try {
-      await DayEntryService.saveDayEntry(dayEntry);
+      if (dayEntry.id) {
+        // update existing entry
+        await DayEntryService.updateDayEntry(dayEntry.id, dayEntry);
+      } else {
+        await DayEntryService.saveDayEntry(dayEntry);
+      }
       Alert.alert('Success', 'Your answers have been saved!');
       // Add a delay before navigating
       setTimeout(() => {

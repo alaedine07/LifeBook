@@ -54,4 +54,25 @@ export const DayEntryService = {
       throw error;
     }
   },
+
+  async updateDayEntry(id: string, dayEntry: DayEntry): Promise<any> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/day-entries/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ responses: dayEntry.responses }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update day entry');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating day entry:', error);
+      throw error;
+    }
+  },
 };
