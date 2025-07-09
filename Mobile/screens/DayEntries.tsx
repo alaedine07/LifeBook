@@ -86,7 +86,7 @@ const DayEntries: React.FC = () => {
           <Text style={styles.entryDate}>{formatDate(item.entryDate)}</Text>
         </TouchableOpacity>
         <Text>
-          {uniqueReflectionsAnswered} / {mockReflections.length} Reflections
+          {uniqueReflectionsAnswered} / {item.responses.length} Reflections
           Answered
         </Text>
         <TouchableOpacity
