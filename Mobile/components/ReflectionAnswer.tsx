@@ -139,7 +139,18 @@ const ReflectionAnswer: React.FC<ReflectionAnswerProps> = ({
 
   const handleDelete = (answerId: string) => {
     if (isReadOnly) return;
-    // setSubmittedAnswers((answers) => answers.filter((a) => a.id !== answerId));
+    setDayEntry((prev) => {
+      const responses = prev.responses.map((response) => {
+        if (response.reflection_text === reflection.content) {
+          const updatedAnswers = response.answers.filter(
+            (_, idx) => idx.toString() !== answerId
+          );
+          return { ...response, answers: updatedAnswers };
+        }
+        return response;
+      });
+      return { ...prev, responses };
+    });
     setSelectedAnswerId(null);
     actionButtonsOpacity.setValue(0);
   };
