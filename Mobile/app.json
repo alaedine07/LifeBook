@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Mobile",
-    "slug": "Mobile",
+    "name": "LifeBook",
+    "slug": "LifeBook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/LifeBookIcon.png",
@@ -18,11 +18,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.si_allela.LifeBook"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "sdkVersion": "50.0.0"
+    "sdkVersion": "50.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "b90ce2ee-174a-4295-b397-ca6692eac6b6"
+      }
+    }
   }
 }

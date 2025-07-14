@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NativeStackNavigationProp } from 'react-native-screens/lib/typescript/native-stack/types';
 import { AppNavigationParams } from '../types';
 import { Edit2, MoreVertical, Trash2 } from 'lucide-react-native';
 
