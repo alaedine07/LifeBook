@@ -1,9 +1,15 @@
 import { Reflection } from '../interfaces/Reflection';
+import { LocalStorageService } from './LocalStorageReflectionAPI';
 
 const API_BASE_URL = 'http://10.0.2.2:3000';
+const useLocalStorage = true;
 
 export const ReflectionService = {
   async fetchReflections(): Promise<Reflection[]> {
+    if (useLocalStorage) {
+      const data = await LocalStorageService.fetchReflections();
+      return data;
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/reflections`);
 
@@ -20,6 +26,9 @@ export const ReflectionService = {
   },
 
   async addReflection(content: string): Promise<Reflection> {
+    if (useLocalStorage) {
+      return await LocalStorageService.addReflection(content);
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/reflections`, {
         method: 'POST',
@@ -42,7 +51,9 @@ export const ReflectionService = {
   },
 
   async updateReflection(id: string, content: string): Promise<Reflection> {
-    console.log('update reflection)');
+    if (useLocalStorage) {
+      return await LocalStorageService.updateReflection(id, content);
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/reflections/${id}`, {
         method: 'PUT',
@@ -65,7 +76,10 @@ export const ReflectionService = {
   },
 
   async deleteReflection(id: string): Promise<void> {
-    console.log('delete reflection');
+    if (useLocalStorage) {
+      await LocalStorageService.deleteReflection(id);
+      return;
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/reflections/${id}`, {
         method: 'DELETE',

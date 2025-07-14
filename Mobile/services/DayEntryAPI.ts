@@ -1,10 +1,14 @@
 import { DayEntry } from '../interfaces/day_entry';
+import { LocalStorageDayEntryService } from './LocalStorageDayEntryAPI';
 
 const API_BASE_URL = 'http://10.0.2.2:3000';
+const useLocalStorage = true;
 
 export const DayEntryService = {
   async saveDayEntry(dayEntry: DayEntry): Promise<any> {
-    console.log('Saving day entry:', dayEntry);
+    if (useLocalStorage) {
+      return await LocalStorageDayEntryService.saveDayEntry(dayEntry);
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/day-entries`, {
         method: 'POST',
@@ -26,6 +30,9 @@ export const DayEntryService = {
   },
 
   async fetchDays(): Promise<DayEntry[]> {
+    if (useLocalStorage) {
+      return await LocalStorageDayEntryService.fetchDays();
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/day-entries/all`);
 
@@ -42,6 +49,10 @@ export const DayEntryService = {
   },
 
   async deleteDayEntry(id: string): Promise<void> {
+    if (useLocalStorage) {
+      await LocalStorageDayEntryService.deleteDayEntry(id);
+      return;
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/day-entries/${id}`, {
         method: 'DELETE',
@@ -56,6 +67,9 @@ export const DayEntryService = {
   },
 
   async updateDayEntry(id: string, dayEntry: DayEntry): Promise<any> {
+    if (useLocalStorage) {
+      return await LocalStorageDayEntryService.updateDayEntry(id, dayEntry);
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/day-entries/${id}`, {
         method: 'PUT',
