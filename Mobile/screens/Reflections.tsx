@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
   View,
   TextInput,
   TouchableOpacity,
@@ -17,6 +16,7 @@ import {
   Edit2,
   Trash2,
 } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Reflection } from '../interfaces/Reflection';
 import { ReflectionService } from '../services/ReflectionsAPI';

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  SafeAreaView,
   ActivityIndicator,
   StyleSheet,
   View,
@@ -10,6 +9,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import ReflectionAnswer from '../components/ReflectionAnswer';
 import PageIndicator from '../components/PageIndicator';
 import { ReflectionService } from '../services/ReflectionsAPI';
