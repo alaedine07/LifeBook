@@ -1,11 +1,9 @@
 // web/src/components/layout/Navbar.jsx
 import { Heart, LogOut, Settings } from 'lucide-react';
+import { useAuthStore } from '../../stores/authStore';
 
-type NavbarProps = {
-  onLogout: () => void;
-};
-
-export default function Navbar({ onLogout }: NavbarProps) {
+export default function Navbar() {
+  const { logout } = useAuthStore();
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -18,7 +16,7 @@ export default function Navbar({ onLogout }: NavbarProps) {
             <Settings className="w-6 h-6" />
           </button>
           <button
-            onClick={onLogout}
+            onClick={logout}
             className="text-gray-600 hover:text-gray-900"
             title="Log out"
           >

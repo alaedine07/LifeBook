@@ -1,106 +1,70 @@
-// src/features/auth/LoginPage.tsx
+// web/src/features/auth/LoginPage.tsx
 import { useState } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
-import { Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useLogin } from '../../hooks/useAuth';
+import AuthLayout from './AuthLayout';
 
-// Accept setIsAuthenticated as a prop from the parent (App.tsx)
-type LoginPageProps = {
-  setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
-};
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-export default function LoginPage({ setIsAuthenticated }: LoginPageProps) {
-  const [isLogin, setIsLogin] = useState(true);
+  const { mutate: login, isPending, error } = useLogin();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    login({ email, password });
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Heart className="w-8 h-8 text-indigo-600" />
-          <h1 className="text-3xl font-bold text-gray-800">LifeBook</h1>
+    <AuthLayout title="Welcome Back">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            required
+            autoComplete="email"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            required
+            autoComplete="current-password"
+          />
         </div>
 
-        {isLogin ? (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Welcome Back</h2>
-            <div className="space-y-4">
-              <input
-                type="email"
-                placeholder="Email"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-              />
-              <button
-                // Use the prop from parent instead of local state
-                onClick={() => setIsAuthenticated(true)}
-                className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition"
-              >
-                Login
-              </button>
-              <p className="text-center text-gray-600">
-                Don't have an account?{' '}
-                <button
-                  onClick={() => setIsLogin(false)}
-                  className="text-indigo-600 font-bold hover:underline"
-                >
-                  Sign up
-                </button>
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="First Name"
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                />
-                <input
-                  type="text"
-                  placeholder="Last Name"
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                />
-              </div>
-              <input
-                type="email"
-                placeholder="Email"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-              />
-              <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600">
-                <option>Normal User</option>
-                <option>Therapist</option>
-              </select>
-              <button
-                // Use the prop from parent instead of local state
-                onClick={() => setIsAuthenticated(true)}
-                className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition"
-              >
-                Sign Up
-              </button>
-              <p className="text-center text-gray-600">
-                Already have an account?{' '}
-                <button
-                  onClick={() => setIsLogin(true)}
-                  className="text-indigo-600 font-bold hover:underline"
-                >
-                  Login
-                </button>
-              </p>
-            </div>
-          </div>
+        <button
+          type="submit"
+          disabled={isPending}
+          className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50"
+        >
+          {isPending ? 'Logging in...' : 'Login'}
+        </button>
+
+        {error && (
+          <p className="text-red-600 text-center text-sm mt-2">
+            {error instanceof Error ? error.message : 'Login failed'}
+          </p>
         )}
-      </div>
-    </div>
+
+        <p className="text-center text-gray-600 mt-4">
+          Don't have an account?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/signup')}
+            className="text-indigo-600 font-bold hover:underline"
+          >
+            Sign up
+          </button>
+        </p>
+      </form>
+    </AuthLayout>
   );
 }
