@@ -1,47 +1,22 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-} from '@nestjs/common';
-import { ReflectionService } from './reflections.service';
-import { Reflection } from './entities/reflection.entity';
-import { CreateReflectionDto, UpdateReflectionDto } from './dto';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from '../auth/get-user.decorator';
+import type { User } from '@prisma/client';
+import { ReflectionsService } from './reflections.service';
+import { CreateReflectionDto } from './dto/create-reflection.dto';
 
 @Controller('reflections')
-export class ReflectionController {
-  constructor(private readonly reflectionService: ReflectionService) {}
-
-  @Get()
-  async findAll(): Promise<Reflection[]> {
-    return this.reflectionService.findAll();
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Reflection | null> {
-    return this.reflectionService.findOne(id);
-  }
+@UseGuards(AuthGuard('jwt'))
+export class ReflectionsController {
+  constructor(private reflectionsService: ReflectionsService) {}
 
   @Post()
-  async create(
-    @Body() createReflectionDto: CreateReflectionDto,
-  ): Promise<Reflection> {
-    return this.reflectionService.create(createReflectionDto);
+  create(@Body() dto: CreateReflectionDto, @GetUser() user: User) {
+    return this.reflectionsService.create(user.id, dto);
   }
 
-  @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateReflectionDto: UpdateReflectionDto,
-  ): Promise<Reflection | null> {
-    return this.reflectionService.update(id, updateReflectionDto);
-  }
-
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
-    return this.reflectionService.remove(id);
+  @Get()
+  list(@GetUser() user: User) {
+    return this.reflectionsService.findByUser(user.id);
   }
 }

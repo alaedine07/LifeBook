@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Reflection } from './entities/reflection.entity';
-import { ReflectionService } from './reflections.service';
-import { ReflectionController } from './reflections.controller';
+import { ReflectionsService } from './reflections.service';
+import { ReflectionsController } from './reflections.controller';
+import { PrismaService } from 'prisma/prisma.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Reflection])],
-  providers: [ReflectionService],
-  controllers: [ReflectionController],
-  exports: [ReflectionService],
+  controllers: [ReflectionsController],
+  providers: [ReflectionsService, PrismaService],
 })
-export class ReflectionModule {}
+export class ReflectionsModule {}

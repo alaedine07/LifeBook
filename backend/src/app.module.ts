@@ -1,21 +1,19 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Reflection } from './reflections/entities/reflection.entity';
-import { DayEntry } from './day-entry/entities/day-entry.entity';
-import { ReflectionModule } from './reflections/reflections.module';
-import { DayEntryModule } from './day-entry/day-entry.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { ReflectionsModule } from './reflections/reflections.module';
+import { MoodsModule } from './moods/moods.module';
+import { TherapistsModule } from './therapists/therapists.module';
+import { DailyAnswersModule } from './daily-answers/daily-answers.module';
+import { PrismaService } from '../prisma/prisma.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot({
-      type: 'sqlite', // Database type
-      database: 'db.sqlite', // File name for SQLite
-      entities: [Reflection, DayEntry], // Add all your entities
-      synchronize: true, // Auto-create tables (perfect for development)
-      logging: true, // Show SQL queries in console (helpful for debugging)
-    }),
-    ReflectionModule,
-    DayEntryModule,
-  ],
+  imports: [ConfigModule.forRoot({isGlobal: true}),AuthModule, UsersModule, ReflectionsModule, MoodsModule, TherapistsModule, DailyAnswersModule],
+  controllers: [AppController],
+  providers: [AppService, PrismaService],
+  exports: [PrismaService],
 })
 export class AppModule {}

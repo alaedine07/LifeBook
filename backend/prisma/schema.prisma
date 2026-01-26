@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int             @id @default(autoincrement())
+  username     String          @unique
+  email        String          @unique
+  password     String
+  role         Role            @default(USER)
+  createdAt    DateTime        @default(now())
+  reflections  Reflection[]
+  dailyAnswers DailyAnswer[]
+  moods        Mood[]
+  therapists   UserTherapist[] @relation("UserToTherapist")
+  patients     UserTherapist[] @relation("TherapistToUser")
+}
+
+enum Role {
+  USER
+  THERAPIST
+}
+
+model Reflection {
+  id       Int            @id @default(autoincrement())
+  userId   Int
+  question String
+  type     ReflectionType
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers  DailyAnswer[]
+}
+
+enum ReflectionType {
+  BOOLEAN
+  NUMBER
+  TEXT
+}
+
+model DailyAnswer {
+  id            Int        @id @default(autoincrement())
+  userId        Int
+  reflectionId  Int
+  date          DateTime   @default(now())
+  booleanAnswer Boolean?
+  numberAnswer  Float?
+  textAnswer    String?
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reflection    Reflection @relation(fields: [reflectionId], references: [id], onDelete: Cascade)
+}
+
+model Mood {
+  id       Int      @id @default(autoincrement())
+  userId   Int
+  date     DateTime @default(now())
+  moodType MoodType
+  note     String?
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum MoodType {
+  HAPPY
+  SAD
+  NEUTRAL
+  EXTREMELY_HAPPY
+  EXTREMELY_SAD
+  ANXIOUS
+  TIRED
+  EXCITED
+  ANGRY
+}
+
+model UserTherapist {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  therapistId Int
+  createdAt   DateTime @default(now())
+  user        User     @relation("UserToTherapist", fields: [userId], references: [id], onDelete: Cascade)
+  therapist   User     @relation("TherapistToUser", fields: [therapistId], references: [id], onDelete: Cascade)
+}
