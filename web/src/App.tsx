@@ -16,21 +16,28 @@ import SignupPage from './features/auth/SignupPage';
 
 import { useAuthStore } from './stores/authStore';
 
+function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  const { role } = useAuthStore();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Navbar />
+      <AppLayout>
+        <div className="col-span-3">
+          <Sidebar userRole={role?.toLowerCase() as 'user' | 'therapist'} />
+        </div>
+        <div className="col-span-9">{children}</div>
+      </AppLayout>
+    </div>
+  );
+}
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('dashboard');
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
 
-  const { isAuthenticated, role } = useAuthStore();
-
-  const pageComponents: Record<string, React.ComponentType<any>> = {
-    dashboard: DashboardPage,
-    reflections: ReflectionsPage,
-    moods: MoodsPage,
-    therapist: TherapistPage,
-    patients: PatientsPage,
-  };
+  const { isAuthenticated } = useAuthStore();
 
   const moodEmojis: Record<string, string> = {
     happy: '😊',
@@ -43,9 +50,9 @@ export default function App() {
   };
 
   const initialReflections = [
-    { id: 1, question: 'How was your mood today?', type: 'yes_no', answer: true },
-    { id: 2, question: 'Rate your anxiety level (1-10)', type: 'number', answer: 7 },
-    { id: 3, question: 'What made you happy today?', type: 'text', answer: 'Spending time with friends' },
+    { id: 1, question: 'How was your mood today?', type: 'yes_no' as const, answer: true },
+    { id: 2, question: 'Rate your anxiety level (1-10)', type: 'number' as const, answer: 7 },
+    { id: 3, question: 'What made you happy today?', type: 'text' as const, answer: 'Spending time with friends' },
   ];
 
   const initialMoods = [
@@ -70,67 +77,56 @@ export default function App() {
           <Route
             path="/dashboard"
             element={
-              <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-                <Navbar />
-                <AppLayout>
-                  <div className="col-span-3">
-                    <Sidebar
-                      currentPage={currentPage}
-                      setCurrentPage={setCurrentPage}
-                      userRole={role?.toLowerCase() as 'user' | 'therapist'}
-                    />
-                  </div>
-                  <div className="col-span-9">
-                    {(() => {
-                      const PageComponent = pageComponents['dashboard'];
-                      return (
-                        <PageComponent
-                          selectedDate={selectedDate}
-                          setSelectedDate={setSelectedDate}
-                          reflections={initialReflections}
-                          moods={initialMoods}
-                          moodEmojis={moodEmojis}
-                        />
-                      );
-                    })()}
-                  </div>
-                </AppLayout>
-              </div>
+              <ProtectedLayout>
+                <DashboardPage
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  reflections={initialReflections}
+                  moods={initialMoods}
+                  moodEmojis={moodEmojis}
+                />
+              </ProtectedLayout>
             }
           />
           <Route
-            path="/*"
+            path="/reflections"
             element={
-              <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-                <Navbar />
-                <AppLayout>
-                  <div className="col-span-3">
-                    <Sidebar
-                      currentPage={currentPage}
-                      setCurrentPage={setCurrentPage}
-                      userRole={role?.toLowerCase() as 'user' | 'therapist'}
-                    />
-                  </div>
-                  <div className="col-span-9">
-                    {(() => {
-                      const PageComponent = pageComponents[currentPage];
-                      return (
-                        <PageComponent
-                          selectedDate={selectedDate}
-                          setSelectedDate={setSelectedDate}
-                          {...(currentPage === 'dashboard' || currentPage === 'reflections'
-                            ? { reflections: initialReflections }
-                            : {})}
-                          {...(currentPage === 'dashboard' || currentPage === 'moods'
-                            ? { moods: initialMoods, moodEmojis }
-                            : {})}
-                          {...(currentPage === 'patients' ? { patients: initialPatients } : {})}
-                        />
-                      );
-                    })()}
-                  </div>
-                </AppLayout>
-              </div>
+              <ProtectedLayout>
+                <ReflectionsPage
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  reflections={initialReflections}
+                />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/moods"
+            element={
+              <ProtectedLayout>
+                <MoodsPage
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  moods={initialMoods}
+                  moodEmojis={moodEmojis}
+                />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/therapist"
+            element={
+              <ProtectedLayout>
+                <TherapistPage />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/patients"
+            element={
+              <ProtectedLayout>
+                <PatientsPage patients={initialPatients} />
+              </ProtectedLayout>
             }
           />
         </>
