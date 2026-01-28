@@ -22,6 +22,10 @@ const formatDateTime = (date: string | Date) => {
 export default function MoodHistory({ moodEmojis, selectedDate }: MoodHistoryProps) {
   const { data: moods = [], isLoading, isError } = useFetchMoodsByDate(selectedDate);
 
+  const sortedMoods = [...moods].sort((a, b) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
@@ -47,7 +51,7 @@ export default function MoodHistory({ moodEmojis, selectedDate }: MoodHistoryPro
         {moods.length === 0 ? (
           <p className="text-gray-500">No moods recorded for this date</p>
         ) : (
-          moods.map((mood: Mood, index: number) => (
+          sortedMoods.map((mood: Mood, index: number) => (
             <div
               key={`${mood.date}-${index}`}
               className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
