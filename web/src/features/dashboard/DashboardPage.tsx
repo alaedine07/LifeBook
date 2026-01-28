@@ -6,9 +6,9 @@ import QuickActions from './QuickActions';
 type DashboardPageProps = {
   selectedDate: string;
   setSelectedDate: (date: string) => void;
-  reflections: Array<{ id: number; question: string; type: string; answer?: any }>;
-  moods: Mood[];
-  moodEmojis: Record<string, string>;
+  reflections?: Array<{ id: number; question: string; type: string; answer?: any }>;
+  moods?: Mood[];
+  moodEmojis?: Record<string, string>;
 };
 
 export default function DashboardPage({
@@ -37,15 +37,15 @@ export default function DashboardPage({
       <div className="grid grid-cols-3 gap-6">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg shadow-md p-6">
           <h3 className="text-sm font-semibold opacity-90">Reflections Completed</h3>
-          <p className="text-4xl font-bold mt-2">{reflections.length}/3</p>
+          <p className="text-4xl font-bold mt-2">{reflections?.length}</p>
         </div>
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg shadow-md p-6">
           <h3 className="text-sm font-semibold opacity-90">Current Mood</h3>
-          <p className="text-4xl mt-2">😊</p>
+          <p className="text-4xl mt-2"></p>
         </div>
         <div className="bg-gradient-to-br from-pink-500 to-pink-600 text-white rounded-lg shadow-md p-6">
           <h3 className="text-sm font-semibold opacity-90">Today's Entries</h3>
-          <p className="text-4xl font-bold mt-2">{moods.length}</p>
+          <p className="text-4xl font-bold mt-2"></p>
         </div>
       </div>
 

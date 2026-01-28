@@ -39,28 +39,6 @@ export default function App() {
 
   const isAuth = useAuthStore((s) => s.isAuthenticated());
 
-  const moodEmojis: Record<string, string> = {
-    happy: '😊',
-    sad: '😢',
-    neutral: '😐',
-    extremely_happy: '🤩',
-    extremely_sad: '😭',
-    anxious: '😰',
-    tired: '😴',
-  };
-
-  const initialReflections = [
-    { id: 1, question: 'How was your mood today?', type: 'BOOLEAN' as const, answer: true },
-    { id: 2, question: 'Rate your anxiety level (1-10)', type: 'NUMBER' as const, answer: 7 },
-    { id: 3, question: 'What made you happy today?', type: 'TEXT' as const, answer: 'Spending time with friends' },
-  ];
-
-  const initialMoods = [
-    { id: 1, type: 'happy', notes: 'Had a great day at work', date: '2024-01-26' },
-    { id: 2, type: 'anxious', notes: 'Worried about upcoming meeting', date: '2024-01-25' },
-    { id: 3, type: 'neutral', notes: '', date: '2024-01-24' },
-  ];
-
   const initialPatients = [
     { id: 1, name: 'John Doe', email: 'john@example.com' },
     { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
@@ -81,9 +59,6 @@ export default function App() {
                 <DashboardPage
                   selectedDate={selectedDate}
                   setSelectedDate={setSelectedDate}
-                  reflections={initialReflections}
-                  moods={initialMoods}
-                  moodEmojis={moodEmojis}
                 />
               </ProtectedLayout>
             }
@@ -95,7 +70,6 @@ export default function App() {
                 <ReflectionsPage
                   selectedDate={selectedDate}
                   setSelectedDate={setSelectedDate}
-                  reflections={initialReflections}
                 />
               </ProtectedLayout>
             }
@@ -107,8 +81,6 @@ export default function App() {
                 <MoodsPage
                   selectedDate={selectedDate}
                   setSelectedDate={setSelectedDate}
-                  moods={initialMoods}
-                  moodEmojis={moodEmojis}
                 />
               </ProtectedLayout>
             }

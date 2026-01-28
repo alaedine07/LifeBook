@@ -2,33 +2,58 @@
 import { useState } from 'react';
 import MoodSelector from './MoodSelector';
 import MoodHistory from './MoodHistory';
+import { useCreateMood } from '../../hooks/useMoods';
 import type { Mood } from '../../lib/types/types';
 
 type MoodsPageProps = {
-  moods: Mood[];
-  moodEmojis: Record<string, string>;
   selectedDate: string;
   setSelectedDate: (date: string) => void;
 };
 
 export default function MoodsPage({
-  moods,
-  moodEmojis,
   selectedDate,
   setSelectedDate,
 }: MoodsPageProps) {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
+  const { mutate: createMood, isPending } = useCreateMood();
 
   const moodList = [
-    'happy',
-    'sad',
-    'neutral',
-    'extremely_happy',
-    'extremely_sad',
-    'anxious',
-    'tired',
+    'HAPPY',
+    'SAD',
+    'NEUTRAL',
+    'EXTREMELY_HAPPY',
+    'EXTREMELY_SAD',
+    'ANXIOUS',
+    'TIRED',
   ] as const;
+
+  const moodEmojis: Record<string, string> = {
+    HAPPY: '😊',
+    SAD: '😢',
+    NEUTRAL: '😐',
+    EXTREMELY_HAPPY: '🤩',
+    EXTREMELY_SAD: '😭',
+    ANXIOUS: '😰',
+    TIRED: '😴',
+  };
+
+  const handleSaveMood = () => {
+    if (!selectedMood) return;
+
+    const moodData: Mood = {
+      moodType: selectedMood,
+      date: selectedDate,
+      note: notes.trim() || undefined,
+    };
+
+    createMood(moodData, {
+      onSuccess: () => {
+        setSelectedMood(null);
+        setNotes('');
+      },
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -63,14 +88,18 @@ export default function MoodsPage({
             placeholder="What's on your mind?"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 h-24"
           />
-          <button className="w-full mt-4 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition">
-            Save Mood
+          <button
+            onClick={handleSaveMood}
+            disabled={isPending}
+            className="w-full mt-4 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {isPending ? 'Saving...' : 'Save Mood'}
           </button>
         </div>
       )}
 
       {/* Mood History */}
-      <MoodHistory moods={moods} moodEmojis={moodEmojis} />
+      <MoodHistory moodEmojis={moodEmojis} selectedDate={selectedDate}/>
     </div>
   );
 }

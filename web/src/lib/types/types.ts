@@ -1,7 +1,8 @@
 // web/src/lib/types.ts
 export interface Mood {
-  type: string;
-  notes?: string;
+  id?: number;
+  moodType: string;
+  note?: string;
   date: string;
 }
 

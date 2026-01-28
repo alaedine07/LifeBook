@@ -7,7 +7,7 @@ import type { Reflection } from '../../lib/types/types';
 import { useCreateReflection, useFetchReflections } from '../../hooks/useReflections';
 
 type ReflectionsPageProps = {
-  reflections: Reflection[];
+  reflections?: Reflection[];
   selectedDate: string;
   setSelectedDate: (date: string) => void;
 };
