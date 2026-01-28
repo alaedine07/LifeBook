@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 import ReflectionCard from './ReflectionCard';
 import ReflectionForm from './ReflectionForm';
 import type { Reflection } from '../../lib/types/types';
+import { useCreateReflection, useFetchReflections } from '../../hooks/useReflections';
 
 type ReflectionsPageProps = {
   reflections: Reflection[];
@@ -12,11 +13,19 @@ type ReflectionsPageProps = {
 };
 
 export default function ReflectionsPage({
-  reflections,
   selectedDate,
   setSelectedDate,
 }: ReflectionsPageProps) {
   const [showForm, setShowForm] = useState(false);
+  const { mutate: createReflection, isPending: isLoading } = useCreateReflection();
+  const { data: serverReflections } = useFetchReflections();
+
+  const displayReflections = serverReflections || [];
+
+  const handleAddReflection = (newReflection: Reflection) => {
+    createReflection(newReflection);
+    setShowForm(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -36,19 +45,24 @@ export default function ReflectionsPage({
         {!showForm ? (
           <button
             onClick={() => setShowForm(true)}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+            disabled={isLoading}
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-5 h-5" />
             Create New Reflection
           </button>
         ) : (
-          <ReflectionForm onCancel={() => setShowForm(false)} />
+          <ReflectionForm
+            onCancel={() => setShowForm(false)}
+            onSave={handleAddReflection}
+            isLoading={isLoading}
+          />
         )}
       </div>
 
       {/* Reflections List */}
       <div className="space-y-4">
-        {reflections.map((reflection) => (
+        {(displayReflections as Reflection[]).map((reflection) => (
           <ReflectionCard key={reflection.id} reflection={reflection} />
         ))}
       </div>

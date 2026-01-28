@@ -6,31 +6,26 @@ type UserRole = 'USER' | 'THERAPIST';
 interface AuthState {
   token: string | null;
   role: UserRole | null;
-  isAuthenticated: boolean;
+  isAuthenticated: () => boolean;
   login: (token: string, role: UserRole) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       token: null,
       role: null,
-      isAuthenticated: false,
 
-      login: (token, role) =>
-        set({
-          token,
-          role,
-          isAuthenticated: true,
-        }),
+      login: (token, role) => set({ token, role }),
 
-      logout: () => set({ token: null, role: null, isAuthenticated: false }),
+      logout: () => set({ token: null, role: null }),
+
+      isAuthenticated: () => !!get().token,
     }),
     {
       name: 'lifebook-auth',
       storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({ token: state.token, role: state.role }),
     }
   )
 );

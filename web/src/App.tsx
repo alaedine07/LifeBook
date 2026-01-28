@@ -37,7 +37,7 @@ export default function App() {
     new Date().toISOString().split('T')[0]
   );
 
-  const { isAuthenticated } = useAuthStore();
+  const isAuth = useAuthStore((s) => s.isAuthenticated());
 
   const moodEmojis: Record<string, string> = {
     happy: '😊',
@@ -50,9 +50,9 @@ export default function App() {
   };
 
   const initialReflections = [
-    { id: 1, question: 'How was your mood today?', type: 'yes_no' as const, answer: true },
-    { id: 2, question: 'Rate your anxiety level (1-10)', type: 'number' as const, answer: 7 },
-    { id: 3, question: 'What made you happy today?', type: 'text' as const, answer: 'Spending time with friends' },
+    { id: 1, question: 'How was your mood today?', type: 'BOOLEAN' as const, answer: true },
+    { id: 2, question: 'Rate your anxiety level (1-10)', type: 'NUMBER' as const, answer: 7 },
+    { id: 3, question: 'What made you happy today?', type: 'TEXT' as const, answer: 'Spending time with friends' },
   ];
 
   const initialMoods = [
@@ -68,11 +68,11 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
+      <Route path="/" element={isAuth ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
-      {isAuthenticated ? (
+      {isAuth ? (
         <>
           <Route
             path="/dashboard"

@@ -18,7 +18,7 @@ export default function ReflectionCard({ reflection }: ReflectionCardProps) {
       </h3>
 
       <div className="space-y-3">
-        {reflection.type === 'text' && (
+        {reflection.type === 'TEXT' && (
           <textarea
             value={answer as string}
             onChange={(e) => setAnswer(e.target.value)}
@@ -27,7 +27,7 @@ export default function ReflectionCard({ reflection }: ReflectionCardProps) {
           />
         )}
 
-        {reflection.type === 'yes_no' && (
+        {reflection.type === 'BOOLEAN' && (
           <div className="flex gap-4">
             <button
               className={`flex-1 py-2 px-4 rounded-lg font-bold transition ${
@@ -52,7 +52,7 @@ export default function ReflectionCard({ reflection }: ReflectionCardProps) {
           </div>
         )}
 
-        {reflection.type === 'number' && (
+        {reflection.type === 'NUMBER' && (
           <div className="flex items-center gap-4">
             <input
               type="range"

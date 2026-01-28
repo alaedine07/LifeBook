@@ -17,6 +17,7 @@ export class ReflectionsService {
   }
 
   async findByUser(userId: number) {
-    return this.prisma.reflection.findMany({ where: { userId } });
+    const reflections = this.prisma.reflection.findMany({ where: { userId } });
+    return reflections;
   }
 }

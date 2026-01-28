@@ -17,6 +17,7 @@ export class ReflectionsController {
 
   @Get()
   list(@GetUser() user: User) {
+    console.log('Fetching reflections for user:', user.id);
     return this.reflectionsService.findByUser(user.id);
   }
 }
