@@ -17,7 +17,7 @@ export default function Navbar() {
           </button>
           <button
             onClick={logout}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-gray-600 hover:text-red-600"
             title="Log out"
           >
             <LogOut className="w-6 h-6" />

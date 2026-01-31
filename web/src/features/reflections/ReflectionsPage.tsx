@@ -17,7 +17,7 @@ export default function ReflectionsPage({
 }: ReflectionsPageProps) {
   const [activeTab, setActiveTab] = useState<'daily' | 'manage'>('daily');
   const { mutate: createReflection, isPending: isCreating } = useCreateReflection();
-  const { data: serverReflections } = useFetchReflections();
+  const { data: serverReflections, isLoading } = useFetchReflections();
 
   const displayReflections = serverReflections || [];
 
@@ -65,12 +65,30 @@ export default function ReflectionsPage({
             />
           </div>
 
-          {/* Reflections List */}
-          <div className="space-y-4">
-            {(displayReflections as Reflection[]).map((reflection) => (
-              <ReflectionCard key={reflection.id} reflection={reflection} selectedDate={selectedDate} />
-            ))}
-          </div>
+          {/* Loading State */}
+          {isLoading ? (
+            <div className="bg-white rounded-lg shadow-md p-12 flex items-center justify-center">
+              <div className="text-center">
+                <div className="inline-block">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                </div>
+                <p className="text-gray-600 mt-4">Loading your reflections...</p>
+              </div>
+            </div>
+          ) : (
+            /* Reflections List */
+            <div className="space-y-4">
+              {displayReflections.length === 0 ? (
+                <div className="bg-white rounded-lg shadow-md p-12 text-center">
+                  <p className="text-gray-500">No reflections available. Create one in the Manage tab to get started!</p>
+                </div>
+              ) : (
+                (displayReflections as Reflection[]).map((reflection) => (
+                  <ReflectionCard key={reflection.id} reflection={reflection} selectedDate={selectedDate} />
+                ))
+              )}
+            </div>
+          )}
         </div>
       )}
 

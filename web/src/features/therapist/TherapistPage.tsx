@@ -26,7 +26,7 @@ export default function TherapistPage() {
               onClick={() => setIsAdded(true)}
               className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition"
             >
-              Add Therapist
+              Invite Therapist
             </button>
           </div>
         </div>
