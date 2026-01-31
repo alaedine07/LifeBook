@@ -20,6 +20,40 @@ export function useCreateReflection() {
   });
 }
 
+export function useUpdateReflection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { id: number; question: string }) => {
+      const { data } = await api.put(`/reflections/${payload.id}`, { question: payload.question });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reflections'] });
+    },
+    onError: (error: any) => {
+      console.error('Failed to update reflection:', error.response?.data?.message || error.message);
+    },
+  });
+}
+
+export function useDeleteReflection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { data } = await api.delete(`/reflections/${id}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reflections'] });
+    },
+    onError: (error: any) => {
+      console.error('Failed to delete reflection:', error.response?.data?.message || error.message);
+    },
+  });
+}
+
 export function useFetchReflections() {
   return useQuery({
     queryKey: ['reflections'],

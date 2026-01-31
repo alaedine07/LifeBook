@@ -1,23 +1,69 @@
 // src/features/reflections/ReflectionCard.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Reflection } from '../../lib/types/types';
-import { useCreateDailyAnswer } from '../../hooks/useDailyAnswers';
+import { useCreateDailyAnswer, useUpdateDailyAnswer, useFetchDailyAnswersByDate } from '../../hooks/useDailyAnswers';
 
 type ReflectionCardProps = {
   reflection: Reflection;
+  selectedDate?: string | null;
 };
 
-export default function ReflectionCard({ reflection }: ReflectionCardProps) {
+export default function ReflectionCard({ reflection, selectedDate }: ReflectionCardProps) {
   const [answer, setAnswer] = useState<Reflection['answer']>(
     reflection.answer ?? ''
   );
   const [success, setSuccess] = useState(false);
-  const { mutate: saveDailyAnswer, isPending, isError, error } = useCreateDailyAnswer();
+  const [hasExistingAnswer, setHasExistingAnswer] = useState(false);
+  const [existingAnswerId, setExistingAnswerId] = useState<number | null>(null);
+  const { mutate: saveDailyAnswer, isPending: isSaving, isError: isSaveError, error: saveError } = useCreateDailyAnswer();
+  const { mutate: updateDailyAnswer, isPending: isUpdating, isError: isUpdateError, error: updateError } = useUpdateDailyAnswer();
+  const { data: dailyAnswers, isLoading: isFetchingAnswers } = useFetchDailyAnswersByDate(selectedDate || null);
+
+  useEffect(() => {
+    if (dailyAnswers && Array.isArray(dailyAnswers)) {
+      const answerForReflection = dailyAnswers.find(
+        (answer: any) => answer.reflectionId === reflection.id
+      );
+
+      if (answerForReflection) {
+        if (reflection.type === 'TEXT') {
+          setAnswer(answerForReflection.textAnswer || '');
+        } else if (reflection.type === 'BOOLEAN') {
+          setAnswer(answerForReflection.booleanAnswer);
+        } else if (reflection.type === 'NUMBER') {
+          setAnswer(answerForReflection.numberAnswer);
+        }
+        setHasExistingAnswer(true);
+        setExistingAnswerId(answerForReflection.id);
+      } else {
+        setAnswer(reflection.answer ?? '');
+        setHasExistingAnswer(false);
+        setExistingAnswerId(null);
+      }
+    } else {
+      setAnswer(reflection.answer ?? '');
+      setHasExistingAnswer(false);
+      setExistingAnswerId(null);
+    }
+  }, [dailyAnswers, reflection]);
+
+  if (isFetchingAnswers) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4">
+          {reflection.question}
+        </h3>
+        <div className="text-center text-gray-500">Loading...</div>
+      </div>
+    );
+  }
+
+  const isPending = isSaving || isUpdating;
+  const isError = isSaveError || isUpdateError;
+  const error = saveError || updateError;
 
   const handleSaveAnswer = () => {
-    const payload: any = {
-      reflectionId: reflection.id,
-    };
+    const payload: any = {};
 
     if (reflection.type === 'TEXT') {
       payload.textAnswer = answer as string;
@@ -27,19 +73,50 @@ export default function ReflectionCard({ reflection }: ReflectionCardProps) {
       payload.numberAnswer = answer as number;
     }
 
-    saveDailyAnswer(payload, {
-      onSuccess: () => {
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      },
-    });
+    if (hasExistingAnswer && existingAnswerId) {
+      updateDailyAnswer(
+        { answerId: existingAnswerId, data: payload },
+        {
+          onSuccess: () => {
+            setSuccess(true);
+            setTimeout(() => setSuccess(false), 3000);
+          },
+        }
+      );
+    } else {
+      saveDailyAnswer(
+        { reflectionId: reflection.id, ...payload },
+        {
+          onSuccess: () => {
+            setSuccess(true);
+            setTimeout(() => setSuccess(false), 3000);
+          },
+        }
+      );
+    }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-bold text-gray-800 mb-4">
-        {reflection.question}
-      </h3>
+    <div className={`rounded-lg shadow-md p-6 transition ${
+      hasExistingAnswer
+        ? 'bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200'
+        : 'bg-white border-2 border-gray-200'
+    }`}>
+      <div className="flex items-start justify-between mb-4">
+        <h3 className="text-lg font-bold text-gray-800 flex-1">
+          {reflection.question}
+        </h3>
+        {hasExistingAnswer && (
+          <span className="ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            ✓ Answered
+          </span>
+        )}
+        {!hasExistingAnswer && (
+          <span className="ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
+            Pending
+          </span>
+        )}
+      </div>
 
       <div className="space-y-3">
         {reflection.type === 'TEXT' && (
@@ -109,7 +186,7 @@ export default function ReflectionCard({ reflection }: ReflectionCardProps) {
           disabled={isPending}
           className="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isPending ? 'Saving...' : 'Save Answer'}
+          {isPending ? 'Saving...' : hasExistingAnswer ? 'Update Answer' : 'Save Answer'}
         </button>
       </div>
     </div>

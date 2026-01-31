@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { CreateDailyAnswerDto } from './dto/create-daily-answer.dto';
+import { UpdateDailyAnswerDto } from './dto/update-daily-answer.dto';
 
 @Injectable()
 export class DailyAnswersService {
@@ -26,6 +27,37 @@ export class DailyAnswersService {
     }
 
     return this.prisma.dailyAnswer.create({ data });
+  }
+
+  async update(userId: number, answerId: number, dto: UpdateDailyAnswerDto) {
+    const dailyAnswer = await this.prisma.dailyAnswer.findUnique({
+      where: { id: answerId },
+      include: { reflection: true },
+    });
+
+    if (!dailyAnswer || dailyAnswer.userId !== userId) {
+      throw new BadRequestException('Invalid answer');
+    }
+
+    const reflection = dailyAnswer.reflection;
+    let updateData: any = {};
+
+    switch (reflection.type) {
+      case 'BOOLEAN':
+        updateData.booleanAnswer = dto.booleanAnswer;
+        break;
+      case 'NUMBER':
+        updateData.numberAnswer = dto.numberAnswer;
+        break;
+      case 'TEXT':
+        updateData.textAnswer = dto.textAnswer;
+        break;
+    }
+
+    return this.prisma.dailyAnswer.update({
+      where: { id: answerId },
+      data: updateData,
+    });
   }
 
   async findByDate(userId: number, date: Date) {
