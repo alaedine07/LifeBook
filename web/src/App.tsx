@@ -39,11 +39,6 @@ export default function App() {
 
   const isAuth = useAuthStore((s) => s.isAuthenticated());
 
-  const initialPatients = [
-    { id: 1, name: 'John Doe', email: 'john@example.com' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
-  ];
-
   return (
     <Routes>
       <Route path="/" element={isAuth ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
@@ -56,10 +51,7 @@ export default function App() {
             path="/dashboard"
             element={
               <ProtectedLayout>
-                <DashboardPage
-                  selectedDate={selectedDate}
-                  setSelectedDate={setSelectedDate}
-                />
+                <DashboardPage />
               </ProtectedLayout>
             }
           />
@@ -97,7 +89,7 @@ export default function App() {
             path="/patients"
             element={
               <ProtectedLayout>
-                <PatientsPage patients={initialPatients} />
+                <PatientsPage />
               </ProtectedLayout>
             }
           />

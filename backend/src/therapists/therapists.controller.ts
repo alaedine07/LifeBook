@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/get-user.decorator';
 import type { User } from '@prisma/client';
@@ -23,5 +23,15 @@ export class TherapistsController {
   @Get('patient/:patientId/data/:date')
   getPatientData(@Param('patientId') patientId: string, @Param('date') date: string, @GetUser() user: User) {
     return this.therapistsService.getPatientData(user.id, parseInt(patientId), new Date(date));
+  }
+
+  @Get('my-therapists')
+  getTherapists(@GetUser() user: User) {
+    return this.therapistsService.getTherapists(user.id);
+  }
+
+  @Delete('remove/:therapistId')
+  deleteTherapist(@Param('therapistId') therapistId: string, @GetUser() user: User) {
+    return this.therapistsService.deleteTherapist(user.id, parseInt(therapistId));
   }
 }

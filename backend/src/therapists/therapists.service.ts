@@ -41,4 +41,23 @@ export class TherapistsService {
 
     return { answers, moods };
   }
+
+  async deleteTherapist(userId: number, therapistId: number) {
+    const link = await this.prisma.userTherapist.findFirst({
+      where: { userId, therapistId },
+    });
+    if (!link) {
+      throw new BadRequestException('Therapist not found');
+    }
+    return this.prisma.userTherapist.delete({
+      where: { id: link.id },
+    });
+  }
+
+  async getTherapists(userId: number) {
+    return this.prisma.userTherapist.findMany({
+      where: { userId },
+      include: { therapist: true },
+    });
+  }
 }

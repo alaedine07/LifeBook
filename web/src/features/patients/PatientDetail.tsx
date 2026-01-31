@@ -1,8 +1,14 @@
 // src/features/patients/PatientDetail.tsx
 import type { Patient } from '../../lib/types/types';
+import { useFetchPatientData } from '../../hooks/useTherapists';
+import { MOOD_EMOJIS } from '../../lib/constants';
+
+interface PatientWithId extends Patient {
+  id: number;
+}
 
 type PatientDetailProps = {
-  patient: Patient;
+  patient: PatientWithId;
   patientDate: string;
   setPatientDate: (date: string) => void;
   onBack: () => void;
@@ -14,16 +20,9 @@ export default function PatientDetail({
   setPatientDate,
   onBack,
 }: PatientDetailProps) {
-  // Dummy data shown in original code - in real app this would come from props/store/API
-  const dummyReflections = [
-    { question: 'How was your mood today?', answer: 'Yes' },
-    { question: 'Rate your anxiety level (1-10)', answer: '7' },
-    { question: 'What made you happy today?', answer: 'Spending time with friends' },
-  ];
-
-  const dummyMoods = [
-    { type: 'happy', notes: 'Had a great day at work', emoji: '😊' },
-  ];
+  const { data: patientData, isLoading } = useFetchPatientData(patient.id, patientDate);
+  const answers = patientData?.answers || [];
+  const moods = patientData?.moods || [];
 
   return (
     <div className="space-y-6">
@@ -55,40 +54,54 @@ export default function PatientDetail({
         <h3 className="text-lg font-bold text-gray-800 mb-4">
           Reflections for {patientDate}
         </h3>
-        <div className="space-y-4">
-          {dummyReflections.map((ref, index) => (
-            <div
-              key={index}
-              className={`p-4 rounded-lg border-l-4 ${
-                index === 0
-                  ? 'bg-blue-50 border-blue-500'
-                  : index === 1
-                  ? 'bg-purple-50 border-purple-500'
-                  : 'bg-green-50 border-green-500'
-              }`}
-            >
-              <p className="font-semibold text-gray-800">{ref.question}</p>
-              <p className="text-gray-600 mt-1">{ref.answer}</p>
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <p className="text-gray-600">Loading reflections...</p>
+        ) : answers.length === 0 ? (
+          <p className="text-gray-600">No reflections answered for this date.</p>
+        ) : (
+          <div className="space-y-4">
+            {answers.map((answer: any, index: number) => (
+              <div
+                key={answer.id}
+                className={`p-4 rounded-lg border-l-4 ${
+                  index === 0
+                    ? 'bg-blue-50 border-blue-500'
+                    : index === 1
+                    ? 'bg-purple-50 border-purple-500'
+                    : 'bg-green-50 border-green-500'
+                }`}
+              >
+                <p className="font-semibold text-gray-800">{answer.reflection.question}</p>
+                <p className="text-gray-600 mt-1">
+                  {answer.textAnswer || answer.booleanAnswer?.toString() || answer.numberAnswer}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-lg font-bold text-gray-800 mb-4">
           Moods for {patientDate}
         </h3>
-        <div className="space-y-3">
-          {dummyMoods.map((mood, index) => (
-            <div key={index} className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg">
-              <span className="text-3xl">{mood.emoji}</span>
-              <div>
-                <p className="font-semibold text-gray-800 capitalize">{mood.type}</p>
-                <p className="text-sm text-gray-600">{mood.notes}</p>
+        {isLoading ? (
+          <p className="text-gray-600">Loading moods...</p>
+        ) : moods.length === 0 ? (
+          <p className="text-gray-600">No moods logged for this date.</p>
+        ) : (
+          <div className="space-y-3">
+            {moods.map((mood: any) => (
+              <div key={mood.id} className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg">
+                <span className="text-3xl">{MOOD_EMOJIS[mood.moodType] || '❓'}</span>
+                <div>
+                  <p className="font-semibold text-gray-800 capitalize">{mood.moodType.replace('_', ' ')}</p>
+                  {mood.note && <p className="text-sm text-gray-600">{mood.note}</p>}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

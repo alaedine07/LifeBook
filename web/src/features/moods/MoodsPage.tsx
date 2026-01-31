@@ -3,6 +3,7 @@ import { useState } from 'react';
 import MoodSelector from './MoodSelector';
 import MoodHistory from './MoodHistory';
 import { useCreateMood } from '../../hooks/useMoods';
+import { MOOD_EMOJIS } from '../../lib/constants';
 import type { Mood } from '../../lib/types/types';
 
 type MoodsPageProps = {
@@ -27,16 +28,6 @@ export default function MoodsPage({
     'ANXIOUS',
     'TIRED',
   ] as const;
-
-  const moodEmojis: Record<string, string> = {
-    HAPPY: '😊',
-    SAD: '😢',
-    NEUTRAL: '😐',
-    EXTREMELY_HAPPY: '🤩',
-    EXTREMELY_SAD: '😭',
-    ANXIOUS: '😰',
-    TIRED: '😴',
-  };
 
   const handleSaveMood = () => {
     if (!selectedMood) return;
@@ -71,7 +62,7 @@ export default function MoodsPage({
       {/* Mood Selector */}
       <MoodSelector
         moodList={moodList}
-        moodEmojis={moodEmojis}
+        moodEmojis={MOOD_EMOJIS}
         selectedMood={selectedMood}
         onSelectMood={setSelectedMood}
       />
@@ -99,7 +90,7 @@ export default function MoodsPage({
       )}
 
       {/* Mood History */}
-      <MoodHistory moodEmojis={moodEmojis} selectedDate={selectedDate} moodList={moodList} />
+      <MoodHistory moodEmojis={MOOD_EMOJIS} selectedDate={selectedDate} moodList={moodList} />
     </div>
   );
 }

@@ -125,6 +125,7 @@ export default function ReflectionManagement({
                     <p className="text-sm text-gray-500">Type: {reflection.type}</p>
                   </div>
                   <div className="flex gap-2">
+                    { deletingId !== reflection.id  && (
                     <button
                       onClick={() => handleEdit(reflection)}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
@@ -132,6 +133,7 @@ export default function ReflectionManagement({
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
+                    )}
                     {deletingId === reflection.id ? (
                       <>
                         <button
