@@ -18,6 +18,7 @@ export default function ReflectionManagement({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editQuestion, setEditQuestion] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const { mutate: updateReflection, isPending: isUpdating } = useUpdateReflection();
   const { mutate: deleteReflection, isPending: isDeleting } = useDeleteReflection();
 
@@ -37,9 +38,17 @@ export default function ReflectionManagement({
     }
   };
 
-  const handleDelete = (id: number | undefined) => {
-    if (id && confirm('Are you sure you want to delete this reflection?')) {
-      deleteReflection(id);
+  const handleDeleteClick = (id: number | undefined) => {
+    setDeletingId(id || null);
+  };
+
+  const handleConfirmDelete = (id: number | undefined) => {
+    if (id) {
+      deleteReflection(id, {
+        onSuccess: () => {
+          setDeletingId(null);
+        },
+      });
     }
   };
 
@@ -123,14 +132,31 @@ export default function ReflectionManagement({
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => handleDelete(reflection.id)}
-                      disabled={isDeleting}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {deletingId === reflection.id ? (
+                      <>
+                        <button
+                          onClick={() => handleConfirmDelete(reflection.id)}
+                          disabled={isDeleting}
+                          className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setDeletingId(null)}
+                          className="px-3 py-1 text-sm bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => handleDeleteClick(reflection.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </>
               )}

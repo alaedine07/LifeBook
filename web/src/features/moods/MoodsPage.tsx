@@ -99,7 +99,7 @@ export default function MoodsPage({
       )}
 
       {/* Mood History */}
-      <MoodHistory moodEmojis={moodEmojis} selectedDate={selectedDate}/>
+      <MoodHistory moodEmojis={moodEmojis} selectedDate={selectedDate} moodList={moodList} />
     </div>
   );
 }

@@ -1,4 +1,3 @@
-// web/src/hooks/useMoods.ts
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/api/api';
 import type { Mood } from '../lib/types/types';
@@ -16,6 +15,43 @@ export function useCreateMood() {
     },
     onError: (error: any) => {
       console.error('Failed to create mood:', error.response?.data?.message || error.message);
+    },
+  });
+}
+
+export function useUpdateMood() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { id: number; moodType?: string; note?: string }) => {
+      const { data } = await api.put(`/moods/${payload.id}`, {
+        moodType: payload.moodType,
+        note: payload.note,
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['moods'] });
+    },
+    onError: (error: any) => {
+      console.error('Failed to update mood:', error.response?.data?.message || error.message);
+    },
+  });
+}
+
+export function useDeleteMood() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { data } = await api.delete(`/moods/${id}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['moods'] });
+    },
+    onError: (error: any) => {
+      console.error('Failed to delete mood:', error.response?.data?.message || error.message);
     },
   });
 }

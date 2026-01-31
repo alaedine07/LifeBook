@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { CreateMoodDto } from './dto/create-mood.dto';
+import { UpdateMoodDto } from './dto/update-mood.dto';
 
 @Injectable()
 export class MoodsService {
@@ -14,6 +15,38 @@ export class MoodsService {
         note: dto.note,
         date: new Date(),
       },
+    });
+  }
+
+  async update(userId: number, moodId: number, dto: UpdateMoodDto) {
+    const mood = await this.prisma.mood.findUnique({
+      where: { id: moodId },
+    });
+
+    if (!mood || mood.userId !== userId) {
+      throw new BadRequestException('Invalid mood');
+    }
+
+    return this.prisma.mood.update({
+      where: { id: moodId },
+      data: {
+        moodType: dto.moodType,
+        note: dto.note,
+      },
+    });
+  }
+
+  async delete(userId: number, moodId: number) {
+    const mood = await this.prisma.mood.findUnique({
+      where: { id: moodId },
+    });
+
+    if (!mood || mood.userId !== userId) {
+      throw new BadRequestException('Invalid mood');
+    }
+
+    return this.prisma.mood.delete({
+      where: { id: moodId },
     });
   }
 
