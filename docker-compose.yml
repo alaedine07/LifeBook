@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lifebook-backend
+    ports:
+      - "5001:3000"
+    networks:
+      - lifebook-network
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: lifebook-web
+    depends_on:
+      - backend
+    ports:
+      - "8090:80"
+    networks:
+      - lifebook-network
+
+networks:
+  lifebook-network:
+    driver: bridge
