@@ -14,6 +14,15 @@ type PatientDetailProps = {
   onBack: () => void;
 };
 
+const formatDateTime = (date: string | Date) => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
 export default function PatientDetail({
   patient,
   patientDate,
@@ -96,6 +105,7 @@ export default function PatientDetail({
                 <span className="text-3xl">{MOOD_EMOJIS[mood.moodType] || '❓'}</span>
                 <div>
                   <p className="font-semibold text-gray-800 capitalize">{mood.moodType.replace('_', ' ')}</p>
+                  <p className="text-sm text-gray-600">{formatDateTime(mood.date)}</p>
                   {mood.note && <p className="text-sm text-gray-600">{mood.note}</p>}
                 </div>
               </div>

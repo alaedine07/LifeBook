@@ -27,7 +27,8 @@ export default function Sidebar({ userRole }: SidebarProps) {
           📊 Dashboard
         </button>
 
-        <button
+        {userRole === 'user' && (
+          <button
           onClick={() => navigate('/reflections')}
           className={`w-full text-left px-4 py-2 rounded-lg transition ${
             isActive('/reflections')
@@ -37,7 +38,9 @@ export default function Sidebar({ userRole }: SidebarProps) {
         >
           💭 Reflections
         </button>
+        )}
 
+        {userRole === 'user' && (
         <button
           onClick={() => navigate('/moods')}
           className={`w-full text-left px-4 py-2 rounded-lg transition ${
@@ -48,6 +51,7 @@ export default function Sidebar({ userRole }: SidebarProps) {
         >
           😊 Moods
         </button>
+        )}
 
         {userRole === 'user' && (
           <button
