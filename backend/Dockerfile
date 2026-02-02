@@ -5,6 +5,8 @@ RUN bun install
 COPY . .
 RUN bun prisma generate
 RUN bun run build
+RUN echo "=== Contents of dist ===" && ls -la dist/ || echo "dist directory not found"
+RUN echo "=== Current directory ===" && pwd && ls -la
 
 # ===========================
 # Production stage
