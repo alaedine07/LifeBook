@@ -1,38 +1,31 @@
-# Build stage
-FROM node:20-alpine AS builder
+FROM jarredsumner/bun:latest AS builder
 
 WORKDIR /app
 
-# Install dependencies
-COPY package*.json ./
-RUN npm ci
+COPY package.json bun.lockb ./
 
-# Copy source code
+RUN bun install
+
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
+RUN bun prisma generate
 
-# Build the application
-RUN npm run build
+RUN bun run build
 
+# ===========================
 # Production stage
-FROM node:20-alpine
+# ===========================
+FROM jarredsumner/bun:latest
 
 WORKDIR /app
 
-# Install only production dependencies
-COPY package*.json ./
-RUN npm ci --only=production
+COPY package.json bun.lockb ./
+RUN bun install --production
 
-# Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Copy Prisma files
 COPY prisma ./prisma
 
-# Expose port
 EXPOSE 5001
 
-# Start the application
-CMD ["node", "dist/main"]
+CMD ["bun", "run", "start"]
