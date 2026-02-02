@@ -28,4 +28,4 @@ COPY prisma ./prisma
 
 EXPOSE 5001
 
-CMD ["bun", "run", "start"]
+CMD ["bun", "dist/main.js"]
