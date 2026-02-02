@@ -1,4 +1,4 @@
-FROM jarredsumner/bun:latest AS builder
+FROM oven/bun:latest AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN bun run build
 # ===========================
 # Production stage
 # ===========================
-FROM jarredsumner/bun:latest
+FROM oven/bun:latest
 
 WORKDIR /app
 
