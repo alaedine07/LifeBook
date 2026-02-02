@@ -2,7 +2,7 @@ FROM oven/bun:latest AS builder
 
 WORKDIR /app
 
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
 
 RUN bun install
 
@@ -19,7 +19,7 @@ FROM oven/bun:latest
 
 WORKDIR /app
 
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
 RUN bun install --production
 
 COPY --from=builder /app/dist ./dist
