@@ -1,21 +1,42 @@
-FROM oven/bun:latest AS builder
-WORKDIR /app
-COPY package.json bun.lock ./
-RUN bun install
-COPY . .
-RUN bun prisma generate
-RUN bun run build
-RUN echo "=== Contents of dist ===" && ls -la dist/ || echo "dist directory not found"
-RUN echo "=== Current directory ===" && pwd && ls -la
+# -----------------------
+# Build stage (Node)
+# -----------------------
+FROM node:20-alpine AS builder
 
-# ===========================
-# Production stage
-# ===========================
-FROM oven/bun:latest
 WORKDIR /app
-COPY package.json bun.lock ./
-RUN bun install --production
+
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy source
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Build NestJS app
+RUN npx nest build
+
+# -----------------------
+# Production stage
+# -----------------------
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install only production dependencies
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
+
+# Copy built app
 COPY --from=builder /app/dist ./dist
+
+# Copy Prisma schema (needed for runtime)
 COPY prisma ./prisma
+
+# Expose port
 EXPOSE 3000
-CMD ["bun", "dist/main.js"]
+
+# Start the app using the compiled JS
+CMD ["node", "dist/main.js"]
