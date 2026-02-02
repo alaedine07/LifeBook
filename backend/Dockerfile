@@ -1,19 +1,20 @@
-FROM oven/bun:latest AS builder
-WORKDIR /app
-COPY package.json bun.lock ./
-RUN bun install
-COPY . .
-RUN bun prisma generate
-RUN bun run build
-
-# ===========================
-# Production stage
-# ===========================
+# Use the Bun runtime
 FROM oven/bun:latest
+
+# Set working directory
 WORKDIR /app
+
+# Copy dependency files
 COPY package.json bun.lock ./
-RUN bun install --production
-COPY --from=builder /app/dist ./dist
-COPY prisma ./prisma
+
+# Install all dependencies
+RUN bun install
+
+# Copy the rest of your app
+COPY . .
+
+# Expose the port your app listens on
 EXPOSE 3000
-CMD ["bun", "dist/src/main.js"]
+
+# Command to run the app
+CMD ["bun", "src/main.js"]
