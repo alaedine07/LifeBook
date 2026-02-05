@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -22,8 +22,8 @@ jobs:
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} -p ${{ secrets.VPS_PORT }} "
-            cd /var/www/TimeManager &&
-            git pull origin master &&
+            cd LifeBook &&
+            git pull origin main &&
             docker-compose -f docker-compose.prod.yml down &&
             docker-compose -f docker-compose.prod.yml up -d --build
           "
