@@ -157,7 +157,7 @@ export default function ReflectionCard({ reflection, selectedDate }: ReflectionC
           <div className="flex items-center gap-4">
             <input
               type="range"
-              min="1"
+              min="0"
               max="10"
               value={(answer as number) || 5}
               onChange={(e) => setAnswer(parseInt(e.target.value, 10))}
