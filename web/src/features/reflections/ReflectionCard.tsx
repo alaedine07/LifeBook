@@ -85,7 +85,7 @@ export default function ReflectionCard({ reflection, selectedDate }: ReflectionC
       );
     } else {
       saveDailyAnswer(
-        { reflectionId: reflection.id, ...payload },
+        { reflectionId: reflection.id, ...payload, date: selectedDate },
         {
           onSuccess: () => {
             setSuccess(true);

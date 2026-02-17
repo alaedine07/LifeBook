@@ -13,7 +13,7 @@ export class DailyAnswersService {
       throw new BadRequestException('Invalid reflection');
     }
 
-    let data: any = { userId, reflectionId: dto.reflectionId, date: new Date() };
+    let data: any = { userId, reflectionId: dto.reflectionId, date: new Date(dto.date) };
     switch (reflection.type) {
       case 'BOOLEAN':
         data.booleanAnswer = dto.booleanAnswer;
@@ -61,10 +61,20 @@ export class DailyAnswersService {
   }
 
   async findByDate(userId: number, date: Date) {
-    const start = new Date(date.setHours(0, 0, 0, 0));
-    const end = new Date(date.setHours(23, 59, 59, 999));
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
     return this.prisma.dailyAnswer.findMany({
-      where: { userId, date: { gte: start, lte: end } },
+      where: {
+        userId,
+        date: {
+          gte: start,
+          lte: end,
+        },
+      },
       include: { reflection: true },
     });
   }

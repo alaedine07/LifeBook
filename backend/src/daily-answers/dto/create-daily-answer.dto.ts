@@ -12,4 +12,7 @@ export class CreateDailyAnswerDto {
 
   @IsOptional() @IsString()
   textAnswer?: string;
+
+  @IsString()
+  date: string;
 }
