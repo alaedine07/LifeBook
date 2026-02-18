@@ -159,12 +159,12 @@ export default function ReflectionCard({ reflection, selectedDate }: ReflectionC
               type="range"
               min="0"
               max="10"
-              value={(answer as number) || 5}
+              value={(answer as number) ?? 5}
               onChange={(e) => setAnswer(parseInt(e.target.value, 10))}
               className="flex-1"
             />
             <span className="text-2xl font-bold text-indigo-600">
-              {(answer as number) || 5}
+              {(answer as number) ?? 5}
             </span>
           </div>
         )}
