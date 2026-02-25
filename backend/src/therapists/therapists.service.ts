@@ -60,4 +60,55 @@ export class TherapistsService {
       include: { therapist: true },
     });
   }
+
+  async addReflectionComment(therapistId: number, answerId: number, comment: string) {
+    return this.prisma.reflectionComment.create({
+      data: {
+        therapistId,
+        DailyAnswerId: answerId,
+        comment,
+      },
+    });
+  }
+
+  async getReflectionComments(therapistId: number, answerId: number) {
+    return this.prisma.reflectionComment.findMany({
+      where: { DailyAnswerId: answerId },
+      include: { therapist: { select: { id: true, username: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async getMoodComments(therapistId: number, moodId: number) {
+    return this.prisma.moodComment.findMany({
+      where: {
+        moodId,
+      },
+      include: {
+        therapist: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  }
+
+  async addMoodComment(
+  therapistId: number,
+  moodId: number,
+  comment: string,
+  ) {
+    return this.prisma.moodComment.create({
+      data: {
+        moodId,
+        therapistId,
+        comment,
+      },
+    });
+  }
 }

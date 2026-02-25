@@ -13,6 +13,7 @@ export class MoodsController {
 
   @Post()
   create(@Body() dto: CreateMoodDto, @GetUser() user: User) {
+    console.log('Creating mood for user:', user.id, 'with data:', dto);
     return this.moodsService.create(user.id, dto);
   }
 

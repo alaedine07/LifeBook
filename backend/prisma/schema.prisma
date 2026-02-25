@@ -50,6 +50,8 @@ model DailyAnswer {
   textAnswer    String?
   user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   reflection    Reflection @relation(fields: [reflectionId], references: [id], onDelete: Cascade)
+
+  reflectionComments ReflectionComment[]
 }
 
 model Mood {
@@ -80,4 +82,14 @@ model UserTherapist {
   createdAt   DateTime @default(now())
   user        User     @relation("UserToTherapist", fields: [userId], references: [id], onDelete: Cascade)
   therapist   User     @relation("TherapistToUser", fields: [therapistId], references: [id], onDelete: Cascade)
+}
+
+model ReflectionComment {
+  id            Int      @id @default(autoincrement())
+  DailyAnswerId Int
+  therapistId   Int
+  comment       String
+  createdAt     DateTime @default(now())
+
+  dailyAnswer DailyAnswer @relation(fields: [DailyAnswerId], references: [id], onDelete: Cascade)
 }
