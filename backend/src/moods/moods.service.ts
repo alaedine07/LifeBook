@@ -13,7 +13,7 @@ export class MoodsService {
         userId,
         moodType: dto.moodType,
         note: dto.note,
-        date: new Date(),
+        date: new Date(dto.date),
       },
     });
   }

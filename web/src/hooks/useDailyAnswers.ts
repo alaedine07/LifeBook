@@ -6,6 +6,7 @@ type CreateDailyAnswerPayload = {
   booleanAnswer?: boolean;
   numberAnswer?: number;
   textAnswer?: string;
+  date?: string;
 };
 
 type UpdateDailyAnswerPayload = {

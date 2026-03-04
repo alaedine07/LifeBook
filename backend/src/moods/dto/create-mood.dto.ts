@@ -7,4 +7,7 @@ export class CreateMoodDto {
 
   @IsOptional() @IsString()
   note?: string;
+
+  @IsString()
+  date: string;
 }
