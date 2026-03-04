@@ -1,3 +1,6 @@
+-- AddForeignKey
+ALTER TABLE "ReflectionComment" ADD CONSTRAINT "ReflectionComment_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
 -- CreateTable
 CREATE TABLE "MoodComment" (
     "id" SERIAL NOT NULL,

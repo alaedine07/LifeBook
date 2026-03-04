@@ -16,6 +16,9 @@ COPY . .
 # Generate Prisma client
 RUN bun prisma generate
 
+# Deploy migrations to the database
+RUN bun prisma migrate deploy
+
 # Expose the port your app listens on
 EXPOSE 3000
 
