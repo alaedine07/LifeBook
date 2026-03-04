@@ -62,6 +62,25 @@ export class TherapistsService {
   }
 
   async addReflectionComment(therapistId: number, answerId: number, comment: string) {
+    // Verify the answer exists and get the userId
+    const answer = await this.prisma.dailyAnswer.findUnique({
+      where: { id: answerId },
+      select: { userId: true },
+    });
+
+    if (!answer) {
+      throw new BadRequestException('Answer not found');
+    }
+
+    // Verify therapist has access to this patient
+    const access = await this.prisma.userTherapist.findFirst({
+      where: { therapistId, userId: answer.userId },
+    });
+
+    if (!access) {
+      throw new ForbiddenException('You do not have access to this patient');
+    }
+
     return this.prisma.reflectionComment.create({
       data: {
         therapistId,
@@ -72,6 +91,25 @@ export class TherapistsService {
   }
 
   async getReflectionComments(therapistId: number, answerId: number) {
+    // Verify the answer exists and get the userId
+    const answer = await this.prisma.dailyAnswer.findUnique({
+      where: { id: answerId },
+      select: { userId: true },
+    });
+
+    if (!answer) {
+      throw new BadRequestException('Answer not found');
+    }
+
+    // Verify therapist has access to this patient
+    const access = await this.prisma.userTherapist.findFirst({
+      where: { therapistId, userId: answer.userId },
+    });
+
+    if (!access) {
+      throw new ForbiddenException('You do not have access to this patient');
+    }
+
     return this.prisma.reflectionComment.findMany({
       where: { DailyAnswerId: answerId },
       include: { therapist: { select: { id: true, username: true } } },
@@ -80,6 +118,25 @@ export class TherapistsService {
   }
 
   async getMoodComments(therapistId: number, moodId: number) {
+    // Verify the mood exists and get the userId
+    const mood = await this.prisma.mood.findUnique({
+      where: { id: moodId },
+      select: { userId: true },
+    });
+
+    if (!mood) {
+      throw new BadRequestException('Mood not found');
+    }
+
+    // Verify therapist has access to this patient
+    const access = await this.prisma.userTherapist.findFirst({
+      where: { therapistId, userId: mood.userId },
+    });
+
+    if (!access) {
+      throw new ForbiddenException('You do not have access to this patient');
+    }
+
     return this.prisma.moodComment.findMany({
       where: {
         moodId,
@@ -99,10 +156,29 @@ export class TherapistsService {
   }
 
   async addMoodComment(
-  therapistId: number,
-  moodId: number,
-  comment: string,
+    therapistId: number,
+    moodId: number,
+    comment: string,
   ) {
+    // Verify the mood exists and get the userId
+    const mood = await this.prisma.mood.findUnique({
+      where: { id: moodId },
+      select: { userId: true },
+    });
+
+    if (!mood) {
+      throw new BadRequestException('Mood not found');
+    }
+
+    // Verify therapist has access to this patient
+    const access = await this.prisma.userTherapist.findFirst({
+      where: { therapistId, userId: mood.userId },
+    });
+
+    if (!access) {
+      throw new ForbiddenException('You do not have access to this patient');
+    }
+
     return this.prisma.moodComment.create({
       data: {
         moodId,

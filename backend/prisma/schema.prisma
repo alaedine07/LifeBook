@@ -18,6 +18,9 @@ model User {
   moods        Mood[]
   therapists   UserTherapist[] @relation("UserToTherapist")
   patients     UserTherapist[] @relation("TherapistToUser")
+
+  reflectionComments ReflectionComment[]
+  moodComments       MoodComment[]
 }
 
 enum Role {
@@ -61,6 +64,8 @@ model Mood {
   moodType MoodType
   note     String?
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  moodComments MoodComment[]
 }
 
 enum MoodType {
@@ -92,4 +97,16 @@ model ReflectionComment {
   createdAt     DateTime @default(now())
 
   dailyAnswer DailyAnswer @relation(fields: [DailyAnswerId], references: [id], onDelete: Cascade)
+  therapist   User        @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+}
+
+model MoodComment {
+  id          Int      @id @default(autoincrement())
+  moodId      Int
+  therapistId Int
+  comment     String
+  createdAt   DateTime @default(now())
+
+  mood      Mood @relation(fields: [moodId], references: [id], onDelete: Cascade)
+  therapist User @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 }
