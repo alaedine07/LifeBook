@@ -13,6 +13,9 @@ RUN bun install
 # Copy the rest of your app
 COPY . .
 
+# Generate Prisma client
+RUN bun prisma generate
+
 # Expose the port your app listens on
 EXPOSE 3000
 
