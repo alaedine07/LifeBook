@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import type { Reflection } from '../../lib/types/types';
 import { useCreateDailyAnswer, useUpdateDailyAnswer, useFetchDailyAnswersByDate } from '../../hooks/useDailyAnswers';
+import { useFetchReflectionComments } from '../../hooks/useReflectionComments';
+import CommentSection from '../../components/CommentSection';
 
 type ReflectionCardProps = {
   reflection: Reflection;
@@ -18,6 +20,7 @@ export default function ReflectionCard({ reflection, selectedDate }: ReflectionC
   const { mutate: saveDailyAnswer, isPending: isSaving, isError: isSaveError, error: saveError } = useCreateDailyAnswer();
   const { mutate: updateDailyAnswer, isPending: isUpdating, isError: isUpdateError, error: updateError } = useUpdateDailyAnswer();
   const { data: dailyAnswers, isLoading: isFetchingAnswers } = useFetchDailyAnswersByDate(selectedDate || null);
+  const { data: comments = [], isLoading: isLoadingComments } = useFetchReflectionComments(existingAnswerId || 0);
 
   useEffect(() => {
     if (dailyAnswers && Array.isArray(dailyAnswers)) {
@@ -189,6 +192,16 @@ export default function ReflectionCard({ reflection, selectedDate }: ReflectionC
           {isPending ? 'Saving...' : hasExistingAnswer ? 'Update Answer' : 'Save Answer'}
         </button>
       </div>
+
+      {/* Display therapist comments */}
+      {hasExistingAnswer && existingAnswerId && (
+        <CommentSection
+          comments={comments || []}
+          onAddComment={() => {}} // Users can only view comments, not add
+          isLoading={isLoadingComments}
+          isAdding={false}
+        />
+      )}
     </div>
   );
 }

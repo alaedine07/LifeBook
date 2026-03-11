@@ -19,7 +19,8 @@ interface Comment {
   createdAt: string | Date;
   therapist?: {
     id: number;
-    name: string;
+    name?: string;
+    username?: string;
   };
 }
 
@@ -74,7 +75,10 @@ export default function CommentSection({
                     {comment.therapist?.name && (
                       <span className="font-semibold">{comment.therapist.name}</span>
                     )}
-                    {comment.therapist?.name && ' • '}
+                    {comment.therapist?.username && !comment.therapist?.name && (
+                      <span className="font-semibold">{comment.therapist.username}</span>
+                    )}
+                    {(comment.therapist?.name || comment.therapist?.username) && ' • '}
                     {formatDateTime(comment.createdAt)}
                   </p>
                 </div>
