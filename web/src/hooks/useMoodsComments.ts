@@ -31,3 +31,38 @@ export function useAddMoodComment(moodId: number) {
     },
   });
 }
+
+export function useDeleteMoodComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (commentId: number) => {
+      const { data } = await api.delete(
+        `/therapists/mood-comments/${commentId}`
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['moodComments'],
+      });
+    },
+  });
+}
+
+export function useUpdateMoodComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { commentId: number; comment: string }) => {
+      const { data } = await api.put(
+        `/therapists/mood-comments/${payload.commentId}`,
+        { comment: payload.comment }
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['moodComments'],
+      });
+    },
+  });
+}

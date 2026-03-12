@@ -1,8 +1,8 @@
 // src/features/patients/PatientDetail.tsx
 import type { Patient } from '../../lib/types/types';
 import { useFetchPatientData } from '../../hooks/useTherapists';
-import { useFetchReflectionComments, useAddReflectionComment } from '../../hooks/useReflectionComments';
-import { useFetchMoodComments, useAddMoodComment } from '../../hooks/useMoodsComments';
+import { useFetchReflectionComments, useAddReflectionComment, useDeleteReflectionComment, useUpdateReflectionComment } from '../../hooks/useReflectionComments';
+import { useFetchMoodComments, useAddMoodComment, useDeleteMoodComment, useUpdateMoodComment } from '../../hooks/useMoodsComments';
 import { MOOD_EMOJIS } from '../../lib/constants';
 import CommentSection from '../../components/CommentSection';
 
@@ -104,6 +104,12 @@ export default function PatientDetail({
 function ReflectionCard({ answer, index }: { answer: any; index: number }) {
   const { data: comments = [], isLoading } = useFetchReflectionComments(answer.id);
   const { mutate: addComment, isPending: isAdding } = useAddReflectionComment(answer.id);
+  const { mutate: deleteReflectionComment } = useDeleteReflectionComment();
+  const { mutate: updateReflectionComment } = useUpdateReflectionComment();
+
+  const handleUpdateComment = (commentId: number, newComment: string) => {
+    updateReflectionComment({ commentId, comment: newComment });
+  };
 
   const bgColors = [
     'bg-blue-50 border-blue-500',
@@ -121,6 +127,8 @@ function ReflectionCard({ answer, index }: { answer: any; index: number }) {
       <CommentSection
         comments={comments}
         onAddComment={addComment}
+        onDeleteComment={deleteReflectionComment}
+        onUpdateComment={handleUpdateComment}
         isLoading={isLoading}
         isAdding={isAdding}
       />
@@ -132,6 +140,12 @@ function ReflectionCard({ answer, index }: { answer: any; index: number }) {
 function MoodCard({ mood }: { mood: any }) {
   const { data: comments = [], isLoading } = useFetchMoodComments(mood.id);
   const { mutate: addComment, isPending: isAdding } = useAddMoodComment(mood.id);
+  const { mutate: deleteMoodComment } = useDeleteMoodComment();
+  const { mutate: updateMoodComment } = useUpdateMoodComment();
+
+  const handleUpdateComment = (commentId: number, newComment: string) => {
+    updateMoodComment({ commentId, comment: newComment });
+  };
 
   return (
     <div className="flex items-start gap-4 p-4 bg-yellow-50 rounded-lg">
@@ -144,6 +158,8 @@ function MoodCard({ mood }: { mood: any }) {
         <CommentSection
           comments={comments}
           onAddComment={addComment}
+          onDeleteComment={deleteMoodComment}
+          onUpdateComment={handleUpdateComment}
           isLoading={isLoading}
           isAdding={isAdding}
         />

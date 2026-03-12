@@ -203,4 +203,111 @@ export class TherapistsService {
       },
     });
   }
+
+  async updateMoodComment(
+    therapistId: number,
+    commentId: number,
+    comment: string,
+  ) {
+    // Verify the comment exists and belongs to the therapist
+    const existingComment = await this.prisma.moodComment.findUnique({
+      where: { id: commentId },
+      select: { therapistId: true },
+    });
+
+    if (!existingComment) {
+      throw new BadRequestException('Comment not found');
+    }
+
+    if (existingComment.therapistId !== therapistId) {
+      throw new ForbiddenException('You can only update your own comments');
+    }
+
+    return this.prisma.moodComment.update({
+      where: { id: commentId },
+      data: { comment },
+      include: {
+        therapist: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    });
+  }
+
+  async deleteMoodComment(therapistId: number, commentId: number) {
+    // Verify the comment exists and belongs to the therapist
+    const existingComment = await this.prisma.moodComment.findUnique({
+      where: { id: commentId },
+      select: { therapistId: true },
+    });
+
+    if (!existingComment) {
+      throw new BadRequestException('Comment not found');
+    }
+
+    if (existingComment.therapistId !== therapistId) {
+      throw new ForbiddenException('You can only delete your own comments');
+    }
+
+    return this.prisma.moodComment.delete({
+      where: { id: commentId },
+    });
+  }
+
+  async updateReflectionComment(
+    therapistId: number,
+    commentId: number,
+    comment: string,
+  ) {
+    // Verify the comment exists and belongs to the therapist
+    const existingComment = await this.prisma.reflectionComment.findUnique({
+      where: { id: commentId },
+      select: { therapistId: true },
+    });
+
+    if (!existingComment) {
+      throw new BadRequestException('Comment not found');
+    }
+
+    if (existingComment.therapistId !== therapistId) {
+      throw new ForbiddenException('You can only update your own comments');
+    }
+
+    return this.prisma.reflectionComment.update({
+      where: { id: commentId },
+      data: { comment },
+      include: {
+        therapist: {
+          select: {
+            id: true,
+            username: true,
+            email: true
+          }
+        }
+      },
+    });
+  }
+
+  async deleteReflectionComment(therapistId: number, commentId: number) {
+    // Verify the comment exists and belongs to the therapist
+    const existingComment = await this.prisma.reflectionComment.findUnique({
+      where: { id: commentId },
+      select: { therapistId: true },
+    });
+
+    if (!existingComment) {
+      throw new BadRequestException('Comment not found');
+    }
+
+    if (existingComment.therapistId !== therapistId) {
+      throw new ForbiddenException('You can only delete your own comments');
+    }
+
+    return this.prisma.reflectionComment.delete({
+      where: { id: commentId },
+    });
+  }
 }

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Trash2, Edit2 } from 'lucide-react';
 import { useFetchMoodsByDate, useUpdateMood, useDeleteMood } from '../../hooks/useMoods';
-import { useFetchMoodComments, useAddMoodComment } from '../../hooks/useMoodsComments';
+import { useFetchMoodComments } from '../../hooks/useMoodsComments';
 import CommentSection from '../../components/CommentSection';
 import type { Mood } from '../../lib/types/types';
 
@@ -65,7 +65,6 @@ function MoodItem({
 }: MoodItemProps) {
   const moodId = mood.id || 0;
   const { data: comments = [], isLoading: isLoadingComments } = useFetchMoodComments(moodId);
-  const { mutate: addComment, isPending: isAddingComment } = useAddMoodComment(moodId);
 
   return (
     <div className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
@@ -158,9 +157,10 @@ function MoodItem({
           </div>
           <CommentSection
             comments={comments}
-            onAddComment={addComment}
+            onAddComment={() => {}} // Users can only view comments, not add, modify or delete them in this context
+            onDeleteComment={() => {}}
+            onUpdateComment={() => {}}
             isLoading={isLoadingComments}
-            isAdding={isAddingComment}
           />
         </div>
       )}

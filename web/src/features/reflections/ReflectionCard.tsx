@@ -197,7 +197,9 @@ export default function ReflectionCard({ reflection, selectedDate }: ReflectionC
       {hasExistingAnswer && existingAnswerId && (
         <CommentSection
           comments={comments || []}
-          onAddComment={() => {}} // Users can only view comments, not add
+          onAddComment={() => {}} // Users can only view comments, not add, modify or delete them in this context
+          onDeleteComment={() => {}}
+          onUpdateComment={() => {}}
           isLoading={isLoadingComments}
           isAdding={false}
         />

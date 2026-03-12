@@ -33,3 +33,38 @@ export function useAddReflectionComment(reflectionId: number) {
     },
   });
 }
+
+export function useDeleteReflectionComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (commentId: number) => {
+      const { data } = await api.delete(
+        `/therapists/reflection-comments/${commentId}`
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['reflectionComments'],
+      });
+    },
+  });
+}
+
+export function useUpdateReflectionComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { commentId: number; comment: string }) => {
+      const { data } = await api.put(
+        `/therapists/reflection-comments/${payload.commentId}`,
+        { comment: payload.comment }
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['reflectionComments'],
+      });
+    },
+  });
+}
