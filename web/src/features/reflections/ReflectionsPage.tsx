@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import ReflectionCard from './ReflectionCard';
 import ReflectionManagement from './ReflectionManagement';
+import ReflectionTimeline from './ReflectionTimeline';
 import type { Reflection } from '../../lib/types/types';
 import { useCreateReflection, useFetchReflections } from '../../hooks/useReflections';
 
@@ -15,7 +16,7 @@ export default function ReflectionsPage({
   selectedDate,
   setSelectedDate,
 }: ReflectionsPageProps) {
-  const [activeTab, setActiveTab] = useState<'daily' | 'manage'>('daily');
+  const [activeTab, setActiveTab] = useState<'daily' | 'timeline' | 'manage'>('daily');
   const { mutate: createReflection, isPending: isCreating } = useCreateReflection();
   const { data: serverReflections, isLoading } = useFetchReflections();
 
@@ -38,6 +39,16 @@ export default function ReflectionsPage({
           }`}
         >
           Daily Reflections
+        </button>
+        <button
+          onClick={() => setActiveTab('timeline')}
+          className={`pb-3 px-4 font-medium transition ${
+            activeTab === 'timeline'
+              ? 'text-indigo-600 border-b-2 border-indigo-600'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          Timeline
         </button>
         <button
           onClick={() => setActiveTab('manage')}
@@ -90,6 +101,11 @@ export default function ReflectionsPage({
             </div>
           )}
         </div>
+      )}
+
+      {/* Timeline Tab */}
+      {activeTab === 'timeline' && (
+        <ReflectionTimeline />
       )}
 
       {/* Manage Reflections Tab */}

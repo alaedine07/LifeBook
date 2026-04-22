@@ -66,3 +66,15 @@ export function useFetchDailyAnswersByDate(date: string | null) {
     staleTime: 1000 * 60 * 5,
   });
 }
+
+export function useFetchDailyAnswersByRange(from: string, to: string) {
+  return useQuery({
+    queryKey: ['daily-answers', 'range', from, to],
+    queryFn: async () => {
+      const { data } = await api.get(`/daily-answers/range/query`, { params: { from, to } });
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!from && !!to,
+  });
+}

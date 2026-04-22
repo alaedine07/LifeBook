@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import MoodSelector from './MoodSelector';
 import MoodHistory from './MoodHistory';
+import MoodTimeline from './MoodTimeline';
 import { useCreateMood } from '../../hooks/useMoods';
 import { MOOD_EMOJIS } from '../../lib/constants';
 import type { Mood } from '../../lib/types/types';
@@ -17,6 +18,7 @@ export default function MoodsPage({
 }: MoodsPageProps) {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
+  const [viewMode, setViewMode] = useState<'today' | 'timeline'>('today');
   const { mutate: createMood, isPending } = useCreateMood();
 
   const moodList = [
@@ -48,18 +50,44 @@ export default function MoodsPage({
 
   return (
     <div className="space-y-6">
-      {/* Header with Date */}
+      {/* Header with View Toggle */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-800">Mood Tracker</h2>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-        />
+        <div className="flex items-center gap-3">
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('today')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${
+                viewMode === 'today'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Daily
+            </button>
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${
+                viewMode === 'timeline'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Timeline
+            </button>
+          </div>
+          {viewMode === 'today' && (
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            />
+          )}
+        </div>
       </div>
 
-      {/* Mood Selector */}
+      {/* Mood Selector (always visible) */}
       <MoodSelector
         moodList={moodList}
         moodEmojis={MOOD_EMOJIS}
@@ -89,8 +117,12 @@ export default function MoodsPage({
         </div>
       )}
 
-      {/* Mood History */}
-      <MoodHistory moodEmojis={MOOD_EMOJIS} selectedDate={selectedDate} moodList={moodList} />
+      {/* Mood History / Timeline */}
+      {viewMode === 'today' ? (
+        <MoodHistory moodEmojis={MOOD_EMOJIS} selectedDate={selectedDate} moodList={moodList} />
+      ) : (
+        <MoodTimeline moodEmojis={MOOD_EMOJIS} moodList={moodList} />
+      )}
     </div>
   );
 }

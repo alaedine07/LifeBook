@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -42,6 +42,32 @@ export class TherapistsService {
     return { answers, moods };
   }
 
+  async getPatientDataRange(therapistId: number, patientId: number, from: Date, to: Date) {
+    const link = await this.prisma.userTherapist.findFirst({
+      where: { therapistId, userId: patientId },
+    });
+    if (!link) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const start = new Date(from);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(to);
+    end.setHours(23, 59, 59, 999);
+
+    const answers = await this.prisma.dailyAnswer.findMany({
+      where: { userId: patientId, date: { gte: start, lte: end } },
+      include: { reflection: true },
+      orderBy: { date: 'desc' },
+    });
+    const moods = await this.prisma.mood.findMany({
+      where: { userId: patientId, date: { gte: start, lte: end } },
+      orderBy: { date: 'desc' },
+    });
+
+    return { answers, moods };
+  }
+
   async deleteTherapist(userId: number, therapistId: number) {
     const link = await this.prisma.userTherapist.findFirst({
       where: { userId, therapistId },
@@ -61,7 +87,7 @@ export class TherapistsService {
     });
   }
 
-  async addReflectionComment(therapistId: number, answerId: number, comment: string) {
+  async addReflectionComment(therapistId: number, answerId: number, comment: string | undefined) {
     // Verify the answer exists and get the userId
     const answer = await this.prisma.dailyAnswer.findUnique({
       where: { id: answerId },
@@ -85,7 +111,7 @@ export class TherapistsService {
       data: {
         therapistId,
         DailyAnswerId: answerId,
-        comment,
+        comment : comment ?? '',
       },
     });
   }
@@ -174,7 +200,7 @@ export class TherapistsService {
   async addMoodComment(
     therapistId: number,
     moodId: number,
-    comment: string,
+    comment: string | undefined,
   ) {
     // Verify the mood exists and get the userId
     const mood = await this.prisma.mood.findUnique({
@@ -199,7 +225,7 @@ export class TherapistsService {
       data: {
         moodId,
         therapistId,
-        comment,
+        comment: comment ?? '',
       },
     });
   }
@@ -207,7 +233,7 @@ export class TherapistsService {
   async updateMoodComment(
     therapistId: number,
     commentId: number,
-    comment: string,
+    comment: string | undefined,
   ) {
     // Verify the comment exists and belongs to the therapist
     const existingComment = await this.prisma.moodComment.findUnique({
@@ -260,7 +286,7 @@ export class TherapistsService {
   async updateReflectionComment(
     therapistId: number,
     commentId: number,
-    comment: string,
+    comment: string | undefined,
   ) {
     // Verify the comment exists and belongs to the therapist
     const existingComment = await this.prisma.reflectionComment.findUnique({

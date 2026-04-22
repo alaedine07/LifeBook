@@ -3,5 +3,5 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class AddMoodCommentDto {
   @IsString()
   @IsNotEmpty()
-  comment: string;
+  comment: string | undefined;
 }

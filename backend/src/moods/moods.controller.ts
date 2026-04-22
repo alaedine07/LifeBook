@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/get-user.decorator';
 import type { User } from '@prisma/client';
@@ -29,6 +29,15 @@ export class MoodsController {
   @Delete(':id')
   delete(@Param('id') id: string, @GetUser() user: User) {
     return this.moodsService.delete(user.id, parseInt(id, 10));
+  }
+
+  @Get('range/query')
+  getByRange(
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @GetUser() user: User,
+  ) {
+    return this.moodsService.findByRange(user.id, new Date(from), new Date(to));
   }
 
   @Get(':date')

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateDailyAnswerDto } from './dto/create-daily-answer.dto';
 import { UpdateDailyAnswerDto } from './dto/update-daily-answer.dto';
 
@@ -76,6 +76,22 @@ export class DailyAnswersService {
         },
       },
       include: { reflection: true },
+    });
+  }
+
+  async findByRange(userId: number, from: Date, to: Date) {
+    const start = new Date(from);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(to);
+    end.setHours(23, 59, 59, 999);
+
+    return this.prisma.dailyAnswer.findMany({
+      where: {
+        userId,
+        date: { gte: start, lte: end },
+      },
+      include: { reflection: true },
+      orderBy: { date: 'desc' },
     });
   }
 }

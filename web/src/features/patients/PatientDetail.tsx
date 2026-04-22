@@ -1,10 +1,12 @@
 // src/features/patients/PatientDetail.tsx
+import { useState } from 'react';
 import type { Patient } from '../../lib/types/types';
 import { useFetchPatientData } from '../../hooks/useTherapists';
 import { useFetchReflectionComments, useAddReflectionComment, useDeleteReflectionComment, useUpdateReflectionComment } from '../../hooks/useReflectionComments';
 import { useFetchMoodComments, useAddMoodComment, useDeleteMoodComment, useUpdateMoodComment } from '../../hooks/useMoodsComments';
 import { MOOD_EMOJIS } from '../../lib/constants';
 import CommentSection from '../../components/CommentSection';
+import PatientTimeline from './PatientTimeline';
 
 interface PatientWithId extends Patient {
   id: number;
@@ -32,6 +34,7 @@ export default function PatientDetail({
   setPatientDate,
   onBack,
 }: PatientDetailProps) {
+  const [viewMode, setViewMode] = useState<'date' | 'timeline'>('timeline');
   const { data: patientData, isLoading } = useFetchPatientData(patient.id, patientDate);
   const answers = patientData?.answers || [];
   const moods = patientData?.moods || [];
@@ -48,54 +51,82 @@ export default function PatientDetail({
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">{patient.name}</h2>
         <p className="text-gray-600 mb-4">{patient.email}</p>
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Select Date
-          </label>
-          <input
-            type="date"
-            value={patientDate}
-            onChange={(e) => setPatientDate(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          />
+
+        <div className="flex items-center gap-3">
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${
+                viewMode === 'timeline'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Timeline
+            </button>
+            <button
+              onClick={() => setViewMode('date')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${
+                viewMode === 'date'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              By Date
+            </button>
+          </div>
+          {viewMode === 'date' && (
+            <input
+              type="date"
+              value={patientDate}
+              onChange={(e) => setPatientDate(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            />
+          )}
         </div>
       </div>
 
-      {/* Reflections Section */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">
-          Reflections for {patientDate}
-        </h3>
-        {isLoading ? (
-          <p className="text-gray-600">Loading reflections...</p>
-        ) : answers.length === 0 ? (
-          <p className="text-gray-600">No reflections answered for this date.</p>
-        ) : (
-          <div className="space-y-4">
-            {answers.map((answer: any, index: number) => (
-              <ReflectionCard key={answer.id} answer={answer} index={index} />
-            ))}
+      {viewMode === 'timeline' ? (
+        <PatientTimeline patientId={patient.id} />
+      ) : (
+        <>
+          {/* Reflections Section */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">
+              Reflections for {patientDate}
+            </h3>
+            {isLoading ? (
+              <p className="text-gray-600">Loading reflections...</p>
+            ) : answers.length === 0 ? (
+              <p className="text-gray-600">No reflections answered for this date.</p>
+            ) : (
+              <div className="space-y-4">
+                {answers.map((answer: any, index: number) => (
+                  <ReflectionCard key={answer.id} answer={answer} index={index} />
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Moods Section */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">
-          Moods for {patientDate}
-        </h3>
-        {isLoading ? (
-          <p className="text-gray-600">Loading moods...</p>
-        ) : moods.length === 0 ? (
-          <p className="text-gray-600">No moods logged for this date.</p>
-        ) : (
-          <div className="space-y-3">
-            {moods.map((mood: any) => (
-              <MoodCard key={mood.id} mood={mood} />
-            ))}
-          </div>
-        )}
-      </div>
+          {/* Moods Section */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">
+              Moods for {patientDate}
+            </h3>
+          {isLoading ? (
+            <p className="text-gray-600">Loading moods...</p>
+          ) : moods.length === 0 ? (
+            <p className="text-gray-600">No moods logged for this date.</p>
+          ) : (
+            <div className="space-y-3">
+              {moods.map((mood: any) => (
+                <MoodCard key={mood.id} mood={mood} />
+              ))}
+            </div>
+          )}
+        </div>
+        </>
+      )}
     </div>
   );
 }

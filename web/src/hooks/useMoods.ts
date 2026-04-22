@@ -77,3 +77,15 @@ export function useFetchMoodsByDate(date: string) {
     staleTime: 1000 * 60 * 5,
   });
 }
+
+export function useFetchMoodsByRange(from: string, to: string) {
+  return useQuery({
+    queryKey: ['moods', 'range', from, to],
+    queryFn: async () => {
+      const { data } = await api.get(`/moods/range/query`, { params: { from, to } });
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!from && !!to,
+  });
+}

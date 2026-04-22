@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateMoodDto } from './dto/create-mood.dto';
 import { UpdateMoodDto } from './dto/update-mood.dto';
 
@@ -55,6 +55,17 @@ export class MoodsService {
     const end = new Date(date.setHours(23, 59, 59, 999));
     return this.prisma.mood.findMany({
       where: { userId, date: { gte: start, lte: end } },
+    });
+  }
+
+  async findByRange(userId: number, from: Date, to: Date) {
+    const start = new Date(from);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(to);
+    end.setHours(23, 59, 59, 999);
+    return this.prisma.mood.findMany({
+      where: { userId, date: { gte: start, lte: end } },
+      orderBy: { date: 'desc' },
     });
   }
 }

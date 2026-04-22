@@ -57,3 +57,15 @@ export function useFetchPatientData(patientId: number | null, date: string) {
     enabled: !!patientId,
   });
 }
+
+export function useFetchPatientDataRange(patientId: number | null, from: string, to: string) {
+  return useQuery({
+    queryKey: ['patientData', 'range', patientId, from, to],
+    queryFn: async () => {
+      if (!patientId) return null;
+      const response = await api.get(`/therapists/patient/${patientId}/data/range/query`, { params: { from, to } });
+      return response.data;
+    },
+    enabled: !!patientId && !!from && !!to,
+  });
+}
