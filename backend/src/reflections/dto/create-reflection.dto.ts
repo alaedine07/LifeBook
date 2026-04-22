@@ -3,8 +3,8 @@ import { ReflectionType } from '@prisma/client';
 
 export class CreateReflectionDto {
   @IsString()
-  question: string;
+  question!: string;
 
   @IsEnum(ReflectionType)
-  type: ReflectionType;
+  type!: ReflectionType;
 }

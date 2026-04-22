@@ -3,11 +3,11 @@ import { MoodType } from '@prisma/client';
 
 export class CreateMoodDto {
   @IsEnum(MoodType)
-  moodType: MoodType;
+  moodType!: MoodType;
 
   @IsOptional() @IsString()
   note?: string;
 
   @IsString()
-  date: string;
+  date!: string;
 }

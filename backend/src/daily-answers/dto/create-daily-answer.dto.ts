@@ -2,7 +2,7 @@ import { IsInt, IsOptional, IsBoolean, IsNumber, IsString } from 'class-validato
 
 export class CreateDailyAnswerDto {
   @IsInt()
-  reflectionId: number;
+  reflectionId: number | undefined;
 
   @IsOptional() @IsBoolean()
   booleanAnswer?: boolean;
@@ -14,5 +14,5 @@ export class CreateDailyAnswerDto {
   textAnswer?: string;
 
   @IsString()
-  date: string;
+  date!: string;
 }
