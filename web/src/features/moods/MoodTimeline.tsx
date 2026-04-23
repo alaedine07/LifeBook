@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Trash2, Edit2, ChevronDown } from 'lucide-react';
+import { Trash2, Edit2, ChevronDown, ChevronRight } from 'lucide-react';
 import { useFetchMoodsByRange, useUpdateMood, useDeleteMood } from '../../hooks/useMoods';
 import { useFetchMoodComments } from '../../hooks/useMoodsComments';
 import CommentSection from '../../components/CommentSection';
@@ -188,6 +188,16 @@ function TimelineMoodItem({
 
 export default function MoodTimeline({ moodEmojis, moodList }: MoodTimelineProps) {
   const [daysLoaded, setDaysLoaded] = useState(DAYS_PER_PAGE);
+  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
+
+  const toggleDate = useCallback((dateKey: string) => {
+    setExpandedDates((prev) => {
+      const next = new Set(prev);
+      if (next.has(dateKey)) next.delete(dateKey);
+      else next.add(dateKey);
+      return next;
+    });
+  }, []);
 
   const { to, from } = useMemo(() => {
     const toDate = new Date();
@@ -241,21 +251,33 @@ export default function MoodTimeline({ moodEmojis, moodList }: MoodTimelineProps
           {groupedMoods.map(([dateKey, dateMoods]) => (
             <div key={dateKey}>
               {/* Sticky date header */}
-              <div className="sticky top-0 z-10 bg-white pb-2 mb-3 border-b border-gray-200">
-                <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wide">
-                  {formatDateHeader(dateKey)}
-                </h4>
+              <div
+                className="sticky top-0 z-10 bg-white pb-2 mb-3 border-b border-gray-200 cursor-pointer select-none"
+                onClick={() => toggleDate(dateKey)}
+              >
+                <div className="flex items-center gap-1">
+                  {expandedDates.has(dateKey) ? (
+                    <ChevronDown className="w-4 h-4 text-indigo-600" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-indigo-600" />
+                  )}
+                  <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wide">
+                    {formatDateHeader(dateKey)}
+                  </h4>
+                </div>
               </div>
-              <div className="space-y-3 pl-4 border-l-2 border-indigo-200">
-                {dateMoods.map((mood, idx) => (
-                  <TimelineMoodItem
-                    key={mood.id || idx}
-                    mood={mood}
-                    moodEmojis={moodEmojis}
-                    moodList={moodList}
-                  />
-                ))}
-              </div>
+              {expandedDates.has(dateKey) && (
+                <div className="space-y-3 pl-4 border-l-2 border-indigo-200">
+                  {dateMoods.map((mood, idx) => (
+                    <TimelineMoodItem
+                      key={mood.id || idx}
+                      mood={mood}
+                      moodEmojis={moodEmojis}
+                      moodList={moodList}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

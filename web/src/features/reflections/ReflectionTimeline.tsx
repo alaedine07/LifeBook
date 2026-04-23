@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useFetchDailyAnswersByRange } from '../../hooks/useDailyAnswers';
 import { useFetchReflectionComments } from '../../hooks/useReflectionComments';
 import CommentSection from '../../components/CommentSection';
@@ -74,6 +74,16 @@ function TimelineAnswerItem({ answer }: { answer: any }) {
 
 export default function ReflectionTimeline() {
   const [daysLoaded, setDaysLoaded] = useState(DAYS_PER_PAGE);
+  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
+
+  const toggleDate = useCallback((dateKey: string) => {
+    setExpandedDates((prev) => {
+      const next = new Set(prev);
+      if (next.has(dateKey)) next.delete(dateKey);
+      else next.add(dateKey);
+      return next;
+    });
+  }, []);
 
   const { to, from } = useMemo(() => {
     const toDate = new Date();
@@ -125,21 +135,33 @@ export default function ReflectionTimeline() {
         <div className="space-y-6">
           {groupedAnswers.map(([dateKey, dateAnswers]) => (
             <div key={dateKey}>
-              <div className="sticky top-0 z-10 bg-white pb-2 mb-3 border-b border-gray-200">
+              <div
+                className="sticky top-0 z-10 bg-white pb-2 mb-3 border-b border-gray-200 cursor-pointer select-none"
+                onClick={() => toggleDate(dateKey)}
+              >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wide">
-                    {formatDateHeader(dateKey)}
-                  </h4>
+                  <div className="flex items-center gap-1">
+                    {expandedDates.has(dateKey) ? (
+                      <ChevronDown className="w-4 h-4 text-indigo-600" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 text-indigo-600" />
+                    )}
+                    <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wide">
+                      {formatDateHeader(dateKey)}
+                    </h4>
+                  </div>
                   <span className="text-xs text-gray-400">
                     {dateAnswers.length} answer{dateAnswers.length !== 1 ? 's' : ''}
                   </span>
                 </div>
               </div>
-              <div className="space-y-3 pl-4 border-l-2 border-indigo-200">
-                {dateAnswers.map((answer: any) => (
-                  <TimelineAnswerItem key={answer.id} answer={answer} />
-                ))}
-              </div>
+              {expandedDates.has(dateKey) && (
+                <div className="space-y-3 pl-4 border-l-2 border-indigo-200">
+                  {dateAnswers.map((answer: any) => (
+                    <TimelineAnswerItem key={answer.id} answer={answer} />
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

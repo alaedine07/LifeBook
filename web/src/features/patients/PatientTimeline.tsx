@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useFetchPatientDataRange } from '../../hooks/useTherapists';
 import { useFetchReflectionComments, useAddReflectionComment, useDeleteReflectionComment, useUpdateReflectionComment } from '../../hooks/useReflectionComments';
 import { useFetchMoodComments, useAddMoodComment, useDeleteMoodComment, useUpdateMoodComment } from '../../hooks/useMoodsComments';
@@ -113,6 +113,16 @@ type PatientTimelineProps = {
 
 export default function PatientTimeline({ patientId }: PatientTimelineProps) {
   const [daysLoaded, setDaysLoaded] = useState(DAYS_PER_PAGE);
+  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
+
+  const toggleDate = useCallback((dateKey: string) => {
+    setExpandedDates((prev) => {
+      const next = new Set(prev);
+      if (next.has(dateKey)) next.delete(dateKey);
+      else next.add(dateKey);
+      return next;
+    });
+  }, []);
 
   const { to, from } = useMemo(() => {
     const toDate = new Date();
@@ -173,11 +183,21 @@ export default function PatientTimeline({ patientId }: PatientTimelineProps) {
         <div className="space-y-6">
           {groupedByDate.map(([dateKey, { moods: dayMoods, answers: dayAnswers }]) => (
             <div key={dateKey}>
-              <div className="sticky top-0 z-10 bg-white pb-2 mb-3 border-b border-gray-200">
+              <div
+                className="sticky top-0 z-10 bg-white pb-2 mb-3 border-b border-gray-200 cursor-pointer select-none"
+                onClick={() => toggleDate(dateKey)}
+              >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wide">
-                    {formatDateHeader(dateKey)}
-                  </h4>
+                  <div className="flex items-center gap-1">
+                    {expandedDates.has(dateKey) ? (
+                      <ChevronDown className="w-4 h-4 text-indigo-600" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 text-indigo-600" />
+                    )}
+                    <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wide">
+                      {formatDateHeader(dateKey)}
+                    </h4>
+                  </div>
                   <div className="flex gap-3 text-xs text-gray-400">
                     {dayMoods.length > 0 && (
                       <span>{dayMoods.length} mood{dayMoods.length !== 1 ? 's' : ''}</span>
@@ -189,25 +209,27 @@ export default function PatientTimeline({ patientId }: PatientTimelineProps) {
                 </div>
               </div>
 
-              <div className="space-y-3 pl-4 border-l-2 border-indigo-200">
-                {/* Moods for this day */}
-                {dayMoods.length > 0 && (
-                  <div className="space-y-2">
-                    {dayMoods.map((mood: any) => (
-                      <PatientMoodItem key={mood.id} mood={mood} />
-                    ))}
-                  </div>
-                )}
+              {expandedDates.has(dateKey) && (
+                <div className="space-y-3 pl-4 border-l-2 border-indigo-200">
+                  {/* Moods for this day */}
+                  {dayMoods.length > 0 && (
+                    <div className="space-y-2">
+                      {dayMoods.map((mood: any) => (
+                        <PatientMoodItem key={mood.id} mood={mood} />
+                      ))}
+                    </div>
+                  )}
 
-                {/* Answers for this day */}
-                {dayAnswers.length > 0 && (
-                  <div className="space-y-2">
-                    {dayAnswers.map((answer: any, idx: number) => (
-                      <PatientReflectionItem key={answer.id} answer={answer} index={idx} />
-                    ))}
-                  </div>
-                )}
-              </div>
+                  {/* Answers for this day */}
+                  {dayAnswers.length > 0 && (
+                    <div className="space-y-2">
+                      {dayAnswers.map((answer: any, idx: number) => (
+                        <PatientReflectionItem key={answer.id} answer={answer} index={idx} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
